@@ -51,9 +51,7 @@ if true % extra stuff
 end
 
 if true % testing (to taste)
-%	addpath(fullfile(mvgc_root,'testing'));
-	addpath(fullfile(mvgc_root,'testing','permtest'));
-	fullfile(mvgc_root,'testing','permtest')
+	addpath(fullfile(mvgc_root,'testing'));
 end
 
 if true % Initialise in-house "Gpmat" Gnuplot/Matlab library if present.
