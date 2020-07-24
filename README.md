@@ -12,3 +12,11 @@ as improving on efficiency and accuracy, also address some well-known problems a
 with standard Granger causality inference from neuroimaging data. The Python implementation
 and EEGLAB/MNE integration facilitate users to deploy the MVGC functionality within their
 standard toolchains.
+
+Currently, this repository contains the MVGC2 standalone MATLAB toolbox. To use the toolbox,
+first inspect the config.m script in the root directory, and edit to taste.
+
+Make sure to run the startup.m script (e.g., by starting MATLAB in th MVGC2 root directory).
+
+WARNING: Do NOT add the entire MVGC2 directory tree to your MATLAB path - this will cause
+things to break! MVGC2 paths are set appropriately by the startup script.
