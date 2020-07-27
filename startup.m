@@ -65,12 +65,14 @@ if ~isempty(graphs_root) % Initialise in-house "graphs" GraphViz/Matlab library 
 	fprintf('[MVGC2 startup] Initialised "graphs" Matlab GraphViz API\n');
 end
 
-if ~isempty(graphs_root) % Initialise in-house LZ library
+if ~isempty(flzc_root) % Initialise in-house LZ library
 	cd(flzc_root);
 	startup;
 	cd(mvgc2_root);
 	fprintf('[MVGC2 startup] Initialised "fLZc" Matlab Lempel-Ziv complexity API\n');
 end
+
+clear mvgc2_root include_experimental include_deprecated include_extras include_testing include_maintainer gpmat_root graphs_root flzc_root
 
 % Check for mex files and set flags appropriately
 
@@ -146,7 +148,7 @@ fprintf('[MVGC2 startup] All warnings enabled\n');
 fprintf('[MVGC2 startup]\n');
 fprintf('[MVGC2 startup] NOTE 1: PLEASE DO NOT ADD THE FULL MVGC HIERARCHY TO YOUR MATLAB SEARCH PATH!\n');
 fprintf('[MVGC2 startup]         Doing so is likely to cause problems. This script has already set up\n');
-fprintf('[MVGC2 startup]         MVGC paths correctly for your Matlab environment.\n');
+fprintf('[MVGC2 startup]         MVGC2 paths correctly for your Matlab environment.\n');
 fprintf('[MVGC2 startup]\n');
 fprintf('[MVGC2 startup] NOTE 2: It is highly recommended that any single-precision floating-point data\n');
 fprintf('[MVGC2 startup]         be converted to double precision; some routines may be inaccurate or\n');
