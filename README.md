@@ -1,6 +1,6 @@
 # MVGC2
 
-This is Version 2 of the MVGC Multivariate Granger Causality MATLAB software suite.
+This is Version 2 (early development) of the MVGC Multivariate Granger Causality MATLAB software suite.
 
 The MVGC2 project will enhance and extend the existing open-source MVGC Multivariate
 Granger Causality MATLAB toolbox (see github.com/SacklerCentre/MVGC1). This project
