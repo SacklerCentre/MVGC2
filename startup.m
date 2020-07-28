@@ -72,8 +72,6 @@ if ~isempty(flzc_root) % Initialise in-house LZ library
 	fprintf('[MVGC2 startup] Initialised "fLZc" Matlab Lempel-Ziv complexity API\n');
 end
 
-clear mvgc2_root include_experimental include_deprecated include_extras include_testing include_maintainer gpmat_root graphs_root flzc_root
-
 % Check for mex files and set flags appropriately
 
 global have_mvfilter_mex;
@@ -154,6 +152,8 @@ fprintf('[MVGC2 startup] NOTE 2: It is highly recommended that any single-precis
 fprintf('[MVGC2 startup]         be converted to double precision; some routines may be inaccurate or\n');
 fprintf('[MVGC2 startup]         numerically unstable for single-precision input.\n');
 fprintf('[MVGC2 startup]\n');
+
+clear mvgc2_root include_experimental include_deprecated include_extras include_testing include_maintainer gpmat_root graphs_root flzc_root
 
 % Done
 
