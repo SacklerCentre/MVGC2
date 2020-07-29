@@ -1,37 +1,38 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% MVGC2 Toolbox "startup" script
+% MVGC2 Toolbox "config" script
 %
 % Configure MVGC2 Toolbox. This script is run by "startup.m".
 %
-% You may have to (or want to) customise this script for your computing
-% environment.
+% This is the default configuration script; to retain local configuration options,
+% copy this file to "local_config.m" and customise.
 %
 % (C) Lionel Barnett and Anil K. Seth, 2020. See file LICENSE in installation
 % directory for licensing terms.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fprintf('[mvgc startup] Initialising MVGC2 toolbox\n');
-
-% Set paths
+% Configure paths, etc.
 
 % Add MVGC2 root directory and appropriate subdirectories to path
 
 mvgc2_root = fileparts(mfilename('fullpath')); % directory containing this file
 
-% Optional paths
+% Optional paths (defaults - override on command line)
 
-include_experimental = true;
-include_extras       = true;
-include_deprecated   = false;
-include_testing      = true;
-include_maintainer   = false;
+if ~exist('include_experimental', 'var'),include_experimental = true;  end
+if ~exist('include_extras',       'var'),include_extras       = true;  end
+if ~exist('include_deprecated',   'var'),include_deprecated   = false; end
+if ~exist('include_testing',      'var'),include_testing      = true;  end
+if ~exist('include_maintainer',   'var'),include_maintainer   = false; end
 
-gpmat_root = fullfile('~','git','gpmat'); % set to empty to omit
-assert(exist(gpmat_root,'dir') == 7,'bad "gpmat" path: ''%s'' does not exist or is not a directory',gpmat_root);
+if ~exist('gpmat_root', 'var')
+	gpmat_root = '';  % set empty to omit
+end
 
-graphs_root = fullfile('~','localrepo','matlab','graphs'); % set to empty to omit
-assert(exist(graphs_root,'dir') == 7,'bad "graphs" path: ''%s'' does not exist or is not a directory',graphs_root);
+if ~exist('graphs_root', 'var')
+	graphs_root = ''; % set empty to omit
+end
 
-flzc_root = fullfile('~','localrepo','c','fLZc','matlab'); % set to empty to omit
-assert(exist(flzc_root,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_root);
+if ~exist('flzc_root', 'var')
+	flzc_root = '';   % set empty to omit
+end

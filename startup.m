@@ -11,11 +11,17 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Set configuration options
-
-config;
-
 fprintf('[MVGC2 startup] Initialising MVGC2 toolbox\n');
+
+% Set configuration options: look first for local configuration file, else run default
+
+if exist('local_config','file') == 2
+	fprintf('[MVGC2 startup] Setting local configuration options\n');
+	local_config;
+else
+	fprintf('[MVGC2 startup] Setting default configuration options\n');
+	config;
+end
 
 % Set paths
 
@@ -52,6 +58,7 @@ if include_maintainer % MVGC maintainer
 end
 
 if ~isempty(gpmat_root) % Initialise in-house "gpmat" Gnuplot/Matlab library if present.
+	assert(exist(gpmat_root,'dir') == 7,'bad "gpmat" path: ''%s'' does not exist or is not a directory',gpmat_root);
 	cd(gpmat_root);
 	startup;
 	cd(mvgc2_root);
@@ -59,6 +66,7 @@ if ~isempty(gpmat_root) % Initialise in-house "gpmat" Gnuplot/Matlab library if 
 end
 
 if ~isempty(graphs_root) % Initialise in-house "graphs" GraphViz/Matlab library if present.
+	assert(exist(graphs_root,'dir') == 7,'bad "graphs" path: ''%s'' does not exist or is not a directory',graphs_root);
 	cd(graphs_root);
 	startup;
 	cd(mvgc2_root);
@@ -66,6 +74,7 @@ if ~isempty(graphs_root) % Initialise in-house "graphs" GraphViz/Matlab library 
 end
 
 if ~isempty(flzc_root) % Initialise in-house LZ library
+	assert(exist(flzc_root,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_root);
 	cd(flzc_root);
 	startup;
 	cd(mvgc2_root);
