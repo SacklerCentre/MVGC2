@@ -11,17 +11,23 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+global mvgc2_root
+mvgc2_root = fileparts(mfilename('fullpath')); % directory containing this file
+
 fprintf('[MVGC2 startup] Initialising MVGC2 toolbox\n');
 
-% Set configuration options: look first for local configuration file, else run default
+% Set configuration options: look first for user-local configuration file in
+% MATLAB preferences directory, else run default
 
-if exist('local_config','file') == 2
-	fprintf('[MVGC2 startup] Setting local configuration options\n');
-	local_config;
+user_config = fullfile(prefdir,'mvgc_config.m');
+if exist(user_config,'file') == 2
+	fprintf('[MVGC2 startup] Setting user-local configuration options\n');
+	run(user_config);
 else
 	fprintf('[MVGC2 startup] Setting default configuration options\n');
 	config;
 end
+clear user_config
 
 % Set paths
 
@@ -40,46 +46,56 @@ addpath(fullfile(mvgc2_root,'docs')); % don't add the 'html' subdirectory!
 if include_experimental
 	addpath(fullfile(mvgc2_root,'experimental')); % not thouroughly tested - use with care!
 end
+clear include_experimental
 
 if include_deprecated
 	addpath(genpath(fullfile(fullfile(mvgc2_root,'deprecated')))); % make deprecated functions available for the time being
 end
+clear include_deprecated
 
 if include_extras
 	addpath(genpath(fullfile(mvgc2_root,'extra')));
 end
+clear include_extras
 
 if include_testing
 	addpath(genpath(fullfile(mvgc2_root,'testing')));
 end
+clear include_testing
 
 if include_maintainer % MVGC maintainer
 	addpath(fullfile(mvgc2_root,'maintainer'));
 end
+clear include_maintainer
 
-if ~isempty(gpmat_root) % Initialise in-house "gpmat" Gnuplot/Matlab library if present.
-	assert(exist(gpmat_root,'dir') == 7,'bad "gpmat" path: ''%s'' does not exist or is not a directory',gpmat_root);
-	cd(gpmat_root);
+fprintf('[MVGC2 startup] Internal paths set\n');
+
+if ~isempty(gpmat_path) % Initialise in-house "gpmat" Gnuplot/Matlab library if present.
+	assert(exist(gpmat_path,'dir') == 7,'bad "gpmat" path: ''%s'' does not exist or is not a directory',gpmat_path);
+	cd(gpmat_path);
 	startup;
 	cd(mvgc2_root);
 	fprintf('[MVGC2 startup] Initialised "gpmat" Matlab Gnuplot API\n');
 end
+clear gpmat_path
 
-if ~isempty(graphs_root) % Initialise in-house "graphs" GraphViz/Matlab library if present.
-	assert(exist(graphs_root,'dir') == 7,'bad "graphs" path: ''%s'' does not exist or is not a directory',graphs_root);
-	cd(graphs_root);
+if ~isempty(graphs_path) % Initialise in-house "graphs" GraphViz/Matlab library if present.
+	assert(exist(graphs_path,'dir') == 7,'bad "graphs" path: ''%s'' does not exist or is not a directory',graphs_path);
+	cd(graphs_path);
 	startup;
 	cd(mvgc2_root);
 	fprintf('[MVGC2 startup] Initialised "graphs" Matlab GraphViz API\n');
 end
+clear graphs_path
 
-if ~isempty(flzc_root) % Initialise in-house LZ library
-	assert(exist(flzc_root,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_root);
-	cd(flzc_root);
+if ~isempty(flzc_path) % Initialise in-house LZ library
+	assert(exist(flzc_path,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_path);
+	cd(flzc_path);
 	startup;
 	cd(mvgc2_root);
 	fprintf('[MVGC2 startup] Initialised "fLZc" Matlab Lempel-Ziv complexity API\n');
 end
+clear flzc_path
 
 % Check for mex files and set flags appropriately
 
@@ -161,8 +177,6 @@ fprintf('[MVGC2 startup] NOTE 2: It is highly recommended that any single-precis
 fprintf('[MVGC2 startup]         be converted to double precision; some routines may be inaccurate or\n');
 fprintf('[MVGC2 startup]         numerically unstable for single-precision input.\n');
 fprintf('[MVGC2 startup]\n');
-
-clear mvgc2_root include_experimental include_deprecated include_extras include_testing include_maintainer gpmat_root graphs_root flzc_root
 
 % Done
 
