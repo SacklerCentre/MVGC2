@@ -1,38 +1,35 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% MVGC2 Toolbox "config" script
+% MVGC2 Toolbox default configuration script
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Configure MVGC2 Toolbox. This script is run by "startup.m".
+% This is the default MVGC configuration script. To set user-local configuration
+% options, copy this file to "mvgc_config.m" in your MATLAB preferences directory
+% (output of the 'prefdir' command) and customise.
 %
-% This is the default configuration script; to retain local configuration options,
-% copy this file to "local_config.m" and customise.
+% The configuration script is run by 'startup'; any of these configuration options
+% may be overriden on the command line before 'startup' is called.
 %
 % (C) Lionel Barnett and Anil K. Seth, 2020. See file LICENSE in installation
 % directory for licensing terms.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Configure paths, etc.
+% Internal options
 
-% Add MVGC2 root directory and appropriate subdirectories to path
+if ~exist('include_experimental', 'var'), include_experimental = true;  end
+if ~exist('include_extras',       'var'), include_extras       = true;  end
+if ~exist('include_deprecated',   'var'), include_deprecated   = false; end
+if ~exist('include_testing',      'var'), include_testing      = false; end
+if ~exist('include_maintainer',   'var'), include_maintainer   = false; end
 
-mvgc2_root = fileparts(mfilename('fullpath')); % directory containing this file
+% Optional external library paths - set to empty to omit from initialisation
+%
+% Examples
+%
+% if ~exist('gpmat_path',  'var'), gpmat_path  = getenv('GPMAT_PATH');  end
+% if ~exist('graphs_path', 'var'), graphs_path = getenv('GRAPHS_PATH'); end
+% if ~exist('flzc_path',   'var'), flzc_path   = getenv('FLZC_PATH');   end
 
-% Optional paths (defaults - override on command line)
-
-if ~exist('include_experimental', 'var'),include_experimental = true;  end
-if ~exist('include_extras',       'var'),include_extras       = true;  end
-if ~exist('include_deprecated',   'var'),include_deprecated   = false; end
-if ~exist('include_testing',      'var'),include_testing      = true;  end
-if ~exist('include_maintainer',   'var'),include_maintainer   = false; end
-
-if ~exist('gpmat_root', 'var')
-	gpmat_root = '';  % set empty to omit
-end
-
-if ~exist('graphs_root', 'var')
-	graphs_root = ''; % set empty to omit
-end
-
-if ~exist('flzc_root', 'var')
-	flzc_root = '';   % set empty to omit
-end
+if ~exist('gpmat_path',  'var'), gpmat_path  = ''; end
+if ~exist('graphs_path', 'var'), graphs_path = ''; end
+if ~exist('flzc_path',   'var'), flzc_path   = ''; end
