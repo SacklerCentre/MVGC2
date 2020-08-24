@@ -49,7 +49,7 @@ end
 clear include_experimental
 
 if include_deprecated
-	addpath(genpath(fullfile(fullfile(mvgc2_root,'deprecated')))); % make deprecated functions available for the time being
+	addpath(genpath(fullfile(fullfile(mvgc2_root,'deprecated'))));
 end
 clear include_deprecated
 
