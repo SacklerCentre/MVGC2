@@ -1,4 +1,4 @@
-function [F,pval] = tsdata_to_var_pwcgc_permtest(X,varmo,regmode,nperms,dclags)
+function [F,pval,A,V] = tsdata_to_var_pwcgc_permtest(X,varmo,regmode,nperms,dclags)
 
 % Estimate pairwise-conditional VAR/SS GC, and calculate p-value using an
 % empirical null permutation distribution. Permutations are formed by rotating
@@ -18,6 +18,7 @@ function [F,pval] = tsdata_to_var_pwcgc_permtest(X,varmo,regmode,nperms,dclags)
 %
 % F        conditional GC estimate
 % pval     p-value for estimate using permutation empirical null distribution
+% A,V      estimated VAR parameters
 
 n = size(X,1);
 

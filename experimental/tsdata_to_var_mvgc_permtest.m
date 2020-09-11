@@ -1,4 +1,4 @@
-function [F,pval] = tsdata_to_var_mvgc_permtest(X,x,y,varmo,regmode,nperms,dclags)
+function [F,pval,A,V] = tsdata_to_var_mvgc_permtest(X,x,y,varmo,regmode,nperms,dclags)
 
 % Estimate conditional VAR/SS GC, and calculate p-value using an empirical
 % null permutation distribution. Permutations are formed by rotating the source
@@ -20,6 +20,7 @@ function [F,pval] = tsdata_to_var_mvgc_permtest(X,x,y,varmo,regmode,nperms,dclag
 %
 % F        conditional GC estimate
 % pval     p-value for estimate using permutation empirical null distribution
+% A,V      estimated VAR parameters
 
 [A,V] = tsdata_to_var(X,varmo,regmode); % estimate VAR model
 F = var_to_mvgc(A,V,x,y);               % calculate GC
