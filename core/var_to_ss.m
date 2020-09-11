@@ -1,5 +1,3 @@
-% READY TO GO!
-
 function [A,C,K,info] = var_to_ss(VARA,V,report)
 
 [n,n1,p] = size(VARA);
