@@ -36,7 +36,7 @@ F0 = zeros(n-1,i);
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
 	for i = 1:nperms
-		X0(y,:) = tsdata_rotate(X(y,:),dclags);        % randomly permute (rotate) source channel time series
+		X0(y,:,:) = tsdata_rotate(X(y,:,:),dclags);    % randomly permute (rotate) source channel time series
 		[A,C,K,V]  = tsdata_to_ss(X0,sspf,ssmo);       % estimate permutation null SS model
 		L = chol(V,'lower'); KL  = K*L; KVK = KL*KL';
 		LDV = log(diag(V));
