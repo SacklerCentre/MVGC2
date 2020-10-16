@@ -1,4 +1,4 @@
-function [F,pval,A,C,K,V] = tsdata_to_ss_mvgc_permtest(X,sspf,ssmo,nperms,dclags)
+function [F,pval,A,C,K,V] = tsdata_to_ss_pwcgc_permtest(X,sspf,ssmo,nperms,dclags)
 
 % Estimate pairwise-conditional state-space GC, and calculate p-value using an
 % empirical null permutation distribution. Permutations are formed by rotating
@@ -33,7 +33,7 @@ end
 
 pval = nan(n);
 X0 = X;
-F0 = zeros(n-1,i);
+F0 = zeros(n-1,nperms);
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
 	for i = 1:nperms
