@@ -33,7 +33,7 @@ end
 
 pval = nan(n);
 X0 = X;
-F0 = zeros(n-1,i);
+F0 = zeros(n-1,nperms);
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
 	for i = 1:nperms
