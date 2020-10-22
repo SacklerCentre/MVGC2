@@ -72,7 +72,7 @@
 function G = tsdata_to_autocov(X,q,debias)
 
 % v2.0 - algorithm corrected for multi-trial case: take mean of per-trial
-% autocovs.
+% autocovs. [n! - reversed!]
 
 % v2.0 - integrated EXPERIMENTAL debias algorithm.
 
@@ -108,12 +108,9 @@ if debias
 else
 
     X = demean(X);
-    for k = 0:q
-        Gk = zeros(n);
-        for r = 1:N
-            Gk = Gk + (X(:,k+1:m,r)*X(:,1:m-k,r)')/(m-k-1);
-        end
-        G(:,:,k+1) = Gk/N;
-    end
+	for k=0:q
+		M = N*(m-k);
+		G(:,:,k+1) = (reshape(X(:,k+1:m,:),n,M)*reshape(X(:,1:m-k,:),n,M)')/(M-1); % unbiased estimator based on M samples
+	end
 
 end
