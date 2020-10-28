@@ -4,7 +4,7 @@ function [F,pval,A,V] = tsdata_to_var_mvgc_permtest(X,x,y,varmo,regmode,nperms,d
 % null permutation distribution. Permutations are formed by rotating the source
 % channel data; rotations are offset by at least 'dclags', which should be set
 % sufficiently large to ensure permuted source is decorrelated from target and
-% conditioning data (see tsdata_rotate.m, decorrlags.m).
+% conditioning data (see tsdata_permute.m, decorrlags.m).
 %
 % Input:
 %
@@ -28,8 +28,8 @@ F = var_to_mvgc(A,V,x,y);               % calculate GC
 X0 = X;
 F0 = zeros(nperms,1);
 for i = 1:nperms
-	X0(y,:,:) = tsdata_rotate(X(y,:,:),dclags); % randomly permute (rotate) source channel time series
-	[A0,V0] = tsdata_to_var(X0,varmo,regmode);  % estimate null VAR model
-	F0(i)   = var_to_mvgc(A0,V0,x,y);           % calculate GC
+	X0(y,:,:) = tsdata_permute(X(y,:,:),dclags); % randomly permute (rotate) source channel time series
+	[A0,V0] = tsdata_to_var(X0,varmo,regmode);   % estimate null VAR model
+	F0(i)   = var_to_mvgc(A0,V0,x,y);            % calculate GC
 end
 pval = mean(F <= F0); % p-value of F with respect to empirical permutation null distribution F0
