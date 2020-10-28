@@ -4,7 +4,7 @@ function [F,pval,A,C,K,V] = tsdata_to_ss_pwcgc_permtest(X,sspf,ssmo,nperms,dclag
 % empirical null permutation distribution. Permutations are formed by rotating
 % the source channel data; rotations are offset by at least 'dclags', which
 % should be set sufficiently large to ensure permuted source is decorrelated
-% from target and conditioning data (see tsdata_rotate.m, decorrlags.m).
+% from target and conditioning data (see tsdata_permute.m, decorrlags.m).
 %
 % Input:
 %
@@ -37,7 +37,7 @@ F0 = zeros(n-1,nperms);
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
 	for i = 1:nperms
-		X0(y,:,:) = tsdata_rotate(X(y,:,:),dclags);    % randomly permute (rotate) source channel time series
+		X0(y,:,:) = tsdata_permute(X(y,:,:),dclags);   % randomly permute (rotate) source channel time series
 		[A,C,K,V]  = tsdata_to_ss(X0,sspf,ssmo);       % estimate permutation null SS model
 		L = chol(V,'lower'); KL  = K*L; KVK = KL*KL';
 		LDV = log(diag(V));

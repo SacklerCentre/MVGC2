@@ -9,7 +9,7 @@ function lags = decorrlags(rho,n,alpha)
 % n     - number of sample observations
 % alpha - correlation significance level
 
-if nargin < 3 || isempty(alpha), alpha = 0.05; end
+if nargin < 3 || isempty(alpha), alpha = 0.01; end
 
 u = exp(-(2/sqrt(n-3))*norminv(alpha/2,0,1)); % for 2-tailed z-test
 lags = ceil(log((u-1)/(u+1))/log(rho));
