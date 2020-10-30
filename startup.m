@@ -79,14 +79,14 @@ if ~isempty(gpmat_path) % Initialise in-house "gpmat" Gnuplot/Matlab library if 
 end
 clear gpmat_path
 
-if ~isempty(graphs_path) % Initialise in-house "graphs" GraphViz/Matlab library if present.
-	assert(exist(graphs_path,'dir') == 7,'bad "graphs" path: ''%s'' does not exist or is not a directory',graphs_path);
-	cd(graphs_path);
+if ~isempty(gvmat_path) % Initialise in-house "gvmat" GraphViz/Matlab library if present.
+	assert(exist(gvmat_path,'dir') == 7,'bad "gvmat" path: ''%s'' does not exist or is not a directory',gvmat_path);
+	cd(gvmat_path);
 	startup;
 	cd(mvgc2_root);
-	fprintf('[MVGC2 startup] Initialised "graphs" Matlab GraphViz API\n');
+	fprintf('[MVGC2 startup] Initialised "gvmat" Matlab GraphViz API\n');
 end
-clear graphs_path
+clear gvmat_path
 
 if ~isempty(flzc_path) % Initialise in-house LZ library
 	assert(exist(flzc_path,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_path);
