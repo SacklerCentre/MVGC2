@@ -16,18 +16,15 @@ mvgc2_root = fileparts(mfilename('fullpath')); % directory containing this file
 
 fprintf('[MVGC2 startup] Initialising MVGC2 toolbox\n');
 
-% Set configuration options: look first for user-local configuration file in
-% MATLAB preferences directory, else run default
+% Set configuration options: look first for config.m in this directory, else run default
 
-user_config = fullfile(prefdir,'mvgc_config.m');
-if exist(user_config,'file') == 2
-	fprintf('[MVGC2 startup] Setting user-local configuration options\n');
-	run(user_config);
+if exist('config.m','file') == 2
+	fprintf('[MVGC2 startup] Setting user configuration options\n');
+	config;
 else
 	fprintf('[MVGC2 startup] Setting default configuration options\n');
-	config;
+	config_default;
 end
-clear user_config
 
 % Set paths
 
