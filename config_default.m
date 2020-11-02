@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % This is the default MVGC configuration script. To set user configuration options,
-% copy this file to "config.m" in this directory
+% copy this file to "config.m" in this directory and edit to taste.
 %
 % The configuration script is run by 'startup'; any of these configuration options
 % may be overriden on the command line before 'startup' is called.
