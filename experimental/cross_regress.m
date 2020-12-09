@@ -27,7 +27,6 @@ ny = length(y);
 p1 = size(G,3);
 p = p1-1;
 
-G0yy = G(y,y,1);
 G1yx = G(y,x,2:p1);
 G1xx = G(x,x,1:p);
 
@@ -36,6 +35,7 @@ Lxy = G1yx(:,:)';
 A = btsolve(G1xx,Lxy)';
 
 if nargout > 1
+	G0yy = G(y,y,1);
 	V = G0yy-A*Lxy;
 end
 

@@ -24,12 +24,10 @@ qn = q*n;
 [qn1,m] = size(Y);
 assert(qn1 == qn,'RHS input matrix does not match Toeplitz matrix');
 
-G0 = G1(:,:,1);
-L = G1(:,:);
+GF = G1(:,:);                                      % top    block-row of Toeplitz matrix
+GB = reshape(permute(flipdim(G1,3),[2,1,3]),n,qn); % bottom block-row of Toeplitz matrix
 
-G = reshape(permute(flipdim(G1,3),[2,1,3]),n,qn); % bottom block row of Toeplitz matrix
-
-Id = eye(n);
+In = eye(n);
 Zn = zeros(n);
 Zm = zeros(n,m);
 
@@ -37,25 +35,23 @@ X = zeros(qn,m);
 
 % Initialise
 
-F = inv(G0);             % "Forward" block vector
-B = F;                   % "Backward" block vector
-X(1:n,:) = F*Y(1:n,:);   % Solution vector
+F = inv(G1(:,:,1));      % forward  block vector
+B = F;                   % backward block vector
+X(1:n,:) = F*Y(1:n,:);   % solution vector
 
 % Recurse
 
 for k = 2:q
-	kd = k*n;
-	xidx = 1:kd;
-	fidx = (k-1)*n+1:kd;
-	bidx = (q-k)*n+1:qn;
-	EF = G(:,bidx)*[F;Zn];
-	EB = L(:,1:kd)*[Zn;B];
-	I1 = inv(Id-EB*EF);
-	I2 = inv(Id-EF*EB);
-	AA = [[I1;-EF*I1],[-EB*I2;I2]];
-	Fk = [[F;Zn],[Zn;B]]*AA(:,1:n);
-	Bk = [[F;Zn],[Zn;B]]*AA(:,n+1:end);
-	F  = Fk;
-	B  = Bk;
-	X(xidx,:) = X(xidx,:)+B*(Y(fidx,:)-G(:,bidx)*X(xidx,:));
+	kn = k*n;
+	yidx = kn-n+1:kn;
+	fidx = 1:kn;
+	bidx = qn-kn+1:qn;
+	F  = [F;Zn];
+	B  = [Zn;B];
+	FB = [F B];
+	EF = GB(:,bidx)*F;
+	EB = GF(:,fidx)*B;
+	F  = FB*([In;-EF]/(In-EB*EF));
+	B  = FB*([-EB;In]/(In-EF*EB));
+	X(fidx,:) = X(fidx,:)+B*(Y(yidx,:)-GB(:,bidx)*X(fidx,:));
 end
