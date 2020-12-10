@@ -182,7 +182,7 @@ end
 
 % construct residual covariances for associated VAR(1)
 
-info.mii  = multiinfo(V);     % multi-information
+info.mii  = multiinfo(V);       % multi-information
 info.mmii = multiinfo(n,true);  % multi-information for uniform random n x n correlation matrix, for comparison
 
 if maxabs(triu(V,1)-triu(V',1)) > eps || ~isposdef(V);

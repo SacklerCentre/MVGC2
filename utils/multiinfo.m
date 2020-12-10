@@ -13,10 +13,14 @@ if nargin < 2 || isempty(umean),  umean  = false; end
 if nargin < 3 || isempty(iscorr), iscorr = false; end
 
 if umean % return negative log of expected value of multi-information for uniform random correlation matrix
-    assert(isscalar(V) && isint(V) && V > 1,'dimension must be an integer greater than 1');
     n = V;
-	k = 1:n-1;
-	g = sum(k.*(log(k+2)-log(k+1)));
+    assert(isscalar(n) && isint(n),'dimension must be an integer greater than 1');
+    if n > 1
+		k = 1:n-1;
+		g = sum(k.*(log(k+2)-log(k+1)));
+	else
+		g = 0;
+	end
 else
 	[n,n1] = size(V);
 	assert(ismatrix(V) && n1 == n,'covariance matrix must be square');
