@@ -26,10 +26,19 @@ nx = length(x);
 ny = length(y);
 p  = size(G,3)-1;
 
+Gxx = G(x,x,1:end-1);
 Gyx = G(y,x,2:end);
 Gyx = Gyx(:,:)';
 
-A = btsolve(G(x,x,1:end-1),Gyx)';
+if nx == 1 % Gxx is Toeplitz, as opposed to block-Toeplitz - use faster algorithm
+
+	A = tsolve(Gxx(:)',Gyx)';
+
+else
+
+	A = btsolve(Gxx,Gyx)';
+
+end
 
 if nargout > 1
 	V = G(y,y,1)-A*Gyx;
