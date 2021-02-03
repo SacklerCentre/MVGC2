@@ -79,6 +79,15 @@ function [A,V,E] = tsdata_to_var(X,p,regmode)
 [n,m,N] = size(X);
 assert(p < m,'too many lags');
 
+if p == 0 % white noise!
+	A = zeros(n,n,0);
+	M = N*m;
+	X0 = reshape(demean(X),n,M);
+	V = (X0*X0')/(M-1);
+	if nargout > 2, E = X; end % time series IS residuals!
+	return
+end
+
 p1 = p+1;
 pn = p*n;
 p1n = p1*n;
