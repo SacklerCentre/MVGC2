@@ -1,4 +1,4 @@
-% Solve (OLS) the p-lag regression problem
+% Solve (OLS) the p-lag cross-regression problem
 %
 % Y_t = A_1 X_{t-1} + A_2 X_{t-2} + ... + A_p X_{t-p} + E_t
 %
@@ -8,8 +8,8 @@
 % INPUT:
 %
 %    G is the autocovariance sequence to p lags (see
-%    'var_to_autocov', etc.), while x,y are the index vectors
-%    to the X,Y sub-processes of the joint process.
+%    'var_to_autocov', etc.), while x,y are index vectors
+%    for the X,Y sub-processes of the joint process.
 %
 % OUTPUT:
 %
@@ -24,19 +24,24 @@ function [A,V] = cross_regress(G,x,y)
 
 nx = length(x);
 ny = length(y);
-p1 = size(G,3);
-p = p1-1;
+p  = size(G,3)-1;
 
-G0yy = G(y,y,1);
-G1yx = G(y,x,2:p1);
-G1xx = G(x,x,1:p);
+Gxx = G(x,x,1:end-1);
+Gyx = G(y,x,2:end);
+Gyx = Gyx(:,:)';
 
-Lxy = G1yx(:,:)';
+if nx == 1 % Gxx is Toeplitz, as opposed to block-Toeplitz - use faster algorithm
 
-A = btsolve(G1xx,Lxy)';
+	A = tsolve(Gxx(:)',Gyx)';
+
+else
+
+	A = btsolve(Gxx,Gyx)';
+
+end
 
 if nargout > 1
-	V = G0yy-A*Lxy;
+	V = G(y,y,1)-A*Gyx;
 end
 
 A = reshape(A,ny,nx,p);
