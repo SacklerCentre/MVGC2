@@ -1,11 +1,12 @@
-function plot_sgc(P,lam,ptitle,logsx,plotm,psize)
+function plot_sgc(P,lam,ptitle,logsx,plotm,psize,flines)
 
 % plotm = n       - Matlab plot to figure n (if empty or zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
 
 if nargin < 4 || isempty(logsx), logsx = false; end
 if nargin < 5 || isempty(plotm), plotm = 0; end
-if nargin < 6, psize = []; end
+if nargin < 6, psize  = []; end
+if nargin < 7, flines = []; end
 
 if iscell(P)
 	assert(isvector(P),'spectral quantities must be a (cell vector of) 3-dim matrix with the first two dims square');
@@ -85,6 +86,13 @@ if ischar(plotm) % Gnuplot
 		fprintf(gp,'\nset multiplot layout %d,%d rowsfirst\n',n,n);
 	end
 
+	if ~isempty(flines)
+		fprintf(gp,'\n');
+		for i = 1:length(flines)
+			fprintf(gp,'set arrow from first %g,graph 0 to first %g,graph 1 nohead\n',flines(i),flines(i));
+		end
+	end
+
 	k = 0;
 	for i = 1:n
 		for j = 1:n
@@ -125,14 +133,19 @@ else
 				ylim(ylims);
 				xlabel(xlab);
 				ylabel(sprintf('%d -> %d',j,i));
+				if logsx
+					set(gca,'xscale','log');
+				end
+				if ~isempty(flines)
+					for i = 1:length(flines)
+						xline(flines(i));
+					end
+				end
 			end
 		end
 	end
 	set(0, 'DefaultAxesColorOrder',dco); % restore default colour order
 
-	if logsx
-		set(gca,'xscale','log');
-	end
 
 	if nargin > 2 && ~isempty(ptitle)
 		axes('Units','Normal');
