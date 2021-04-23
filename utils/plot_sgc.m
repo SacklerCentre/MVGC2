@@ -1,10 +1,11 @@
-function plot_sgc(P,lam,ptitle,plotm,psize)
+function plot_sgc(P,lam,ptitle,logsx,plotm,psize)
 
 % plotm = n       - Matlab plot to figure n (if empty or zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
 
-if nargin < 4 || isempty(plotm), plotm = 0; end
-if nargin < 5, psize = []; end
+if nargin < 4 || isempty(logsx), logsx = false; end
+if nargin < 5 || isempty(plotm), plotm = 0; end
+if nargin < 6, psize = []; end
 
 if iscell(P)
 	assert(isvector(P),'spectral quantities must be a (cell vector of) 3-dim matrix with the first two dims square');
@@ -74,6 +75,9 @@ if ischar(plotm) % Gnuplot
 	fprintf(gp,'\nset xlab "frequency (Hz)"\n');
 	fprintf(gp,'set xr[%g:%g]\n',xlims(1),xlims(2));
 	fprintf(gp,'set yr[%g:%g]\n',ylims(1),ylims(2));
+	if logsx
+		fprintf(gp,'set logs x\n');
+	end
 
 	if nargin > 2 && ~isempty(ptitle)
 		fprintf(gp,'\nset multiplot title "%s\\n\\n" layout %d,%d rowsfirst\n',ptitle,n,n);
@@ -107,7 +111,7 @@ else
 
 	Pij = zeros(h,S);
 	k = 0;
-	for i = n:-1:1
+	for i = 1:n
 		for j = 1:n
 			k = k+1;
 			if i ~= j
@@ -125,6 +129,10 @@ else
 		end
 	end
 	set(0, 'DefaultAxesColorOrder',dco); % restore default colour order
+
+	if logsx
+		set(gca,'xscale','log');
+	end
 
 	if nargin > 2 && ~isempty(ptitle)
 		axes('Units','Normal');
