@@ -1,9 +1,10 @@
-function plot_sgc(P,lam,ptitle,plotm)
+function plot_sgc(P,lam,ptitle,plotm,psize)
 
 % plotm = n       - Matlab plot to figure n (if empty or zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
 
 if nargin < 4 || isempty(plotm), plotm = 0; end
+if nargin < 5, psize = []; end
 
 if iscell(P)
 	assert(isvector(P),'spectral quantities must be a (cell vector of) 3-dim matrix with the first two dims square');
@@ -49,7 +50,7 @@ if ischar(plotm) % Gnuplot
 
 	PP = cell(n*(n-1),1);
 	k = 0;
-	for i = n:-1:1
+	for i = 1:n
 		for j = 1:n
 			if i ~= j
 				k = k+1;
@@ -63,7 +64,7 @@ if ischar(plotm) % Gnuplot
 
 	gp_write(gpstem,PP);
 
-	gp = gp_open(gpstem,plotm,[Inf Inf]);
+	gp = gp_open(gpstem,plotm,psize);
 
 	fprintf(gp,'datfile = "%s.dat"\n\n',gpstem);
 
@@ -81,7 +82,7 @@ if ischar(plotm) % Gnuplot
 	end
 
 	k = 0;
-	for i = n:-1:1
+	for i = 1:n
 		for j = 1:n
 			if i == j
 				fprintf(gp,'\nset multiplot next\n');
