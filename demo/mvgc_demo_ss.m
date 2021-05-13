@@ -183,7 +183,7 @@ freqs = sfreqs(fres,fs);
 % Plot spectral causal graphs.
 
 if isnumeric(plotm), plotm = plotm+1; end
-plot_sgc({ff,f},freqs,'Spectral Granger causalities (blue = actual, red = estimated)',plotm);
+plot_sgc({ff,f},freqs,'Spectral Granger causalities (blue = actual, red = estimated)',[],plotm);
 
 % Granger causality calculation: frequency domain -> time-domain
 
