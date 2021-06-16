@@ -48,11 +48,13 @@ ylims = [min(Pm) 1.1*max(Px)];
 
 if ischar(plotm) % Gnuplot
 
+	if isempty(psize), psize = [Inf,1]; end
+
 	gpstem = fullfile(tempdir,'plot_sgc');
 
 	PP = cell(n*(n-1),1);
 	k = 0;
-	for i = 1:n
+	for i = n:-1:1
 		for j = 1:n
 			if i ~= j
 				k = k+1;
@@ -76,6 +78,8 @@ if ischar(plotm) % Gnuplot
 	fprintf(gp,'\nset xlab "frequency (Hz)"\n');
 	fprintf(gp,'set xr[%g:%g]\n',xlims(1),xlims(2));
 	fprintf(gp,'set yr[%g:%g]\n',ylims(1),ylims(2));
+	fprintf(gp,'set format y "%%.1f"\n');
+	fprintf(gp,'set size square\n');
 	if logsx
 		fprintf(gp,'set logs x\n');
 	end
@@ -94,7 +98,7 @@ if ischar(plotm) % Gnuplot
 	end
 
 	k = 0;
-	for i = 1:n
+	for i = n:-1:1
 		for j = 1:n
 			if i == j
 				fprintf(gp,'\nset multiplot next\n');
@@ -115,11 +119,11 @@ else
 	if plotm == 0, figure; else, figure(plotm); end; clf;
 
 	dco = get(0,'DefaultAxesColorOrder'); % save default colour order
-	set(0, 'DefaultAxesColorOrder',[0 0 0.8; 0.8 0 0; 0 0.8 0; dco]); % set to blue, red, green
+	set(0,'DefaultAxesColorOrder',[0 0 0.8; 0.8 0 0; 0 0.8 0; dco]); % set to blue, red, green
 
 	Pij = zeros(h,S);
 	k = 0;
-	for i = 1:n
+	for i = n:-1:1
 		for j = 1:n
 			k = k+1;
 			if i ~= j
@@ -145,7 +149,6 @@ else
 		end
 	end
 	set(0, 'DefaultAxesColorOrder',dco); % restore default colour order
-
 
 	if nargin > 2 && ~isempty(ptitle)
 		axes('Units','Normal');
