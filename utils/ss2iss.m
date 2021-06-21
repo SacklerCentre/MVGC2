@@ -27,12 +27,16 @@ function [K,V,rep,L,P] = ss2iss(A,C,Q,R,S)
 [r, r1] = size(A); assert(r1 == r);
 [n, r1] = size(C); assert(r1 == r);
 [r1,r2] = size(Q); assert(r1 == r && r2 == r);
+if nargin < 4 || isempty(R)
+	R = eye(n);
+else
+	[n1,n2] = size(R); assert(n1 == n && n2 == n);
+end
 if nargin < 5 || isempty(S)
 	S = zeros(r,n);
 else
 	[r1,n1] = size(S); assert(r1 == r && n1 == n);
 end
-[n1,n2] = size(R); assert(n1 == n && n2 == n);
 rr = 2*r;
 
 K = [];
