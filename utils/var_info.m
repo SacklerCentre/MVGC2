@@ -4,8 +4,11 @@ if nargin < 3 || isempty(report), report = 1; end % default: print out report
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
-[n1,n2]  = size(V);
-assert(n1 == n && n2 == n,'Residuals covariance matrix must be square and match VAR coefficients matrix');
+if nargin < 2 || isempty(V)
+	V = eye(n);
+else
+	[n1,n2] = size(V); assert(n1 == n && n2 == n);
+end
 pn1 = (p-1)*n;
 
 info.error = uint32(0);

@@ -1,11 +1,16 @@
 function info = ss_info(A,C,K,V,report)
 
-if nargin < 5 || isempty(report), report = 1; end % default: print out report
+if nargin < 5 || isempty(report), report = 1;      end % default: print out report
 
 [r, r1] = size(A); assert(r1 == r);
 [n, r1] = size(C); assert(r1 == r);
 [r1,n1] = size(K); assert(n1 == n && r1 == r);
-[n1,n2] = size(V); assert(n1 == n && n2 == n);
+if nargin < 4 || isempty(V)
+	V = eye(n);
+else
+	[n1,n2] = size(V); assert(n1 == n && n2 == n);
+end
+
 
 info.error = uint32(0);
 
