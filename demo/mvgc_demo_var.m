@@ -155,12 +155,14 @@ plot_gc(pdata,ptitle,[],maxp,plotm);
 % sensible. Warn if resolution is very large, as this may cause problems.
 
 if isempty(fres)
-    fres = 2^nextpow2(max(info.acdec,infoo.acdec)); % alternatively, fres = 2^nextpow2(nobs);
-	fprintf('\nUsing frequency resolution %d\n',fres);
-end
-if fres > 10000 % adjust to taste
-	fprintf(2,'\nWARNING: large frequency resolution = %d - may cause computation time/memory usage problems\nAre you sure you wish to continue [y/n]? ',fres);
-	istr = input(' ','s'); if isempty(istr) || ~strcmpi(istr,'y'); fprintf(2,'Aborting...\n'); return; end
+	maxfres = 2^14; % adjust to taste
+	fres = calc_fres(max(info.rho,infoo.rho)); % estimate a reasonable frequency resolution
+	if fres > maxfres
+		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d\n' ,fres,maxfres);
+		fres = maxfres;
+	else
+		fprintf('\nUsing frequency resolution %d\n',fres);
+	end
 end
 
 ptic(sprintf('\n*** var_to_spwcgc (at frequency resolution = %d)... ',fres));
