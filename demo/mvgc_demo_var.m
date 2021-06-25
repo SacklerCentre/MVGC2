@@ -156,14 +156,16 @@ plot_gc(pdata,ptitle,[],maxp,plotm);
 
 if isempty(fres)
 	maxfres = 2^14; % adjust to taste
-	fres = calc_fres(max(info.rho,infoo.rho)); % estimate a reasonable frequency resolution
+	fres = max(info.fres,infoo.fres);
 	if fres > maxfres
-		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d\n' ,fres,maxfres);
+		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
 		fres = maxfres;
 	else
-		fprintf('\nUsing frequency resolution %d\n',fres);
+		fprintf('\nUsing frequency resolution %d',fres);
 	end
 end
+fabserr = var_check_fres(A,V,fres);
+fprintf(' (absolute integration error = %e)\n',fabserr);
 
 ptic(sprintf('\n*** var_to_spwcgc (at frequency resolution = %d)... ',fres));
 f = var_to_spwcgc(A,V,fres);

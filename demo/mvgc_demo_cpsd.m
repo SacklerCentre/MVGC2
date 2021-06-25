@@ -42,14 +42,16 @@ assert(~ssinfo.error,'SS error(s) found - bailing out');
 
 if isempty(fres)
 	maxfres = 2^14;
-    fres = calc_fres(rhoa);
+	fres = ssinfo.fres;
 	if fres > maxfres
-		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d\n' ,fres,maxfres);
+		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
 		fres = maxfres;
 	else
-		fprintf('\nUsing frequency resolution %d\n',fres);
+		fprintf('\nUsing frequency resolution %d',fres);
 	end
 end
+fabserr = ss_check_fres(A,C,K,V,fres);
+fprintf(' (absolute integration error = %e)\n',fabserr);
 
 % Calculate CPSD from SS parameters
 
