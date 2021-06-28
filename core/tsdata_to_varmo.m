@@ -78,7 +78,9 @@ if ~isempty(plotm) % we're going to plot
 
 	if ischar(plotm) % Gnuplot
 
-		gpstem = fullfile(tempdir,'varmo');
+		gpname = 'varmo';
+
+		gpstem = fullfile(tempdir,gpname);
 
 		gpdat = [mo saic sbic shqc [NaN;lpval]];
 
@@ -99,7 +101,7 @@ if ~isempty(plotm) % we're going to plot
 
 		gp = gp_open(gpstem,plotm,[Inf,0.6]);
 
-		fprintf(gp,'datfile = "%s.dat"\n',gpstem);
+		fprintf(gp,'datfile = "%s.dat"\n',gpname);
 
 		fprintf(gp,'\nset grid\n');
 		fprintf(gp,'set xr[0:%g]\n',p);
