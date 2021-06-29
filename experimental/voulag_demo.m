@@ -148,7 +148,7 @@ for k = 1:c, GG(G(k,1),G(k,2)) = 1; end
 
 pf = 2*varmo; % Bauer recommends 2 x VAR model order
 
-[ssmo,ssmomax] = tsdata_to_sssvc(X,pf,[],3);
+[ssmo,ssmomax] = tsdata_to_ssmo(X,pf,3);
 assert(ssmo > 0,'selected zero model order! GCs will all be zero!');
 if ssmo >= ssmomax, fprintf(2,'*** WARNING: selected SS maximum model order (may have been set too low)\n'); end
 
