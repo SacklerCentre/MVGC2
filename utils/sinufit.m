@@ -39,7 +39,7 @@
 %
 %%
 
-function [retval,f] = sinufitf(x,fs,f,fftol,verb)
+function [retval,f] = sinufit(x,fs,f,fftol,verb)
 
 if nargin < 2 || isempty(fs), fs = 2*pi; end % If no sampling frequency supplied assume angular frequency.
 

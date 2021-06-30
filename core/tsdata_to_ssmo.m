@@ -7,7 +7,7 @@ function [mosvc,rmax] = tsdata_to_ssmo(X,pf,plotm)
 % plotm   - empty: don't plot, integer: Matlab plot to figure n (if zero, use next); string: Gnuplot terminal (may be empty)
 %
 % mosvc   - Bauer's Singular Value Criterion (SVC) optimal model order
-% rma     - maximum possible model order given supplied past/future horizons
+% rmax    - maximum possible model order given supplied past/future horizons
 %
 % The past/future horizons pf may be supplied as a 2-vector [p,f] or a scalar p
 % = f = pf. Bauer (D. Bauer, Automatic 37, 2001) recommends setting p = f = 2*p,

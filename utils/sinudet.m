@@ -1,8 +1,8 @@
-% SINUSOIDAL LEAST-SQUARES-FIT SIGNAL
+% SINUSOIDALLY DETREND SIGNAL
 %
 % INVOCATION
 %
-% [s,p,q] = sinufits(x,fs,f)
+% [y,s,p,q] = sinudet(x,fs,f)
 %
 % INPUTS
 %
@@ -12,6 +12,7 @@
 %
 % OUTPUTS
 %
+% y         the sinusoidally-detrended signal
 % s         the sinusoidal least-squares fit signal
 % p,q       sinusoidal coefficients: fitted sinusoid is p.*cos(w*t) + q.*sin(w*t)
 %           NOTE: sinusoid amplitude is hypot(p,q)
@@ -27,7 +28,7 @@
 %
 %%
 
-function [s,p,q] = sinufits(x,fs,f)
+function [y,s,p,q] = sinudet(x,fs,f)
 
 if isempty(fs), fs = 2*pi; end % If no sampling frequency supplied assume angular frequency.
 
@@ -42,7 +43,7 @@ mu = mean(x);   % save mean
 x  = x-mu;      % temporal de-mean
 t  = (0:T-1)';  % time sequence
 
-% Calculate the sinusoidal fit
+% Build the sinusoidal signal
 
 W    = (sin(w*T)/sin(w))/T;
 u    = W*cos(w*(T-1));
@@ -55,3 +56,4 @@ D    = 2/(1-W*W);
 p    = D*((1-u)*xc-v*xs); % cos coefficient
 q    = D*((1+u)*xs-v*xc); % sin coefficient
 s    = p.*comt+q.*somt;   % the sinusoidal signal
+y    = x-s+mu;            % the sinusoidally-detrended x (reinstate mean)
