@@ -20,9 +20,7 @@
 % mse       the MSE over the frequency range
 % f         actual frequency range used
 %
-% NOTE 1    Frequencies should lie within the range (0 ... Nyqvist].
-%
-% NOTE 2    If calculating the optimal frequency in a range, the range should be
+% NOTE      If calculating the optimal frequency in a range, the range should be
 %           small enough that the MSE is approximately "U-shaped" within that
 %           range. If not, the 'fminbnd' function used to locate the optimal
 %           frequency may return a value corresponding to a local sub-optimum.
@@ -57,7 +55,7 @@ else
 		assert(all(f(:,2) > f(:,1)),'Fit frequencies must be ascending');
 	end
 end
-assert(all(f(:) > eps & f(:) <= fs/2),'Frequencies must lie in range (0 .. Nyqvist]');
+%assert(all(f(:) > eps & f(:) <= fs/2),'Frequencies must lie in range (0 .. Nyqvist]');
 nf = size(f,1);
 
 x = x-mean(x,2); % temporal de-mean

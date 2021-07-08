@@ -8,7 +8,7 @@
 %
 % x         matrix of time-series values (variables x observations)
 % fs        sampling frequency (default: angular frequency in range 0 ... 2*pi)
-% f         sinusoidal frequency to remove (in range (0 .. Nyqvist])
+% f         sinusoidal frequency to remove
 % sw        weights on sinusoids (default: 1 - remove entire sinusoid)
 %
 % OUTPUTS
@@ -31,7 +31,7 @@ assert(ismatrix(x),'Time series must be a matrix');
 [n,m] = size(x);
 
 assert(isvector(f),'Sinusoidal frequencies must be a vector');
-assert(all(f > 0 & f <= fs/2),'Sinusoidal frequencies must lie in range (0 .. Nyqvist]');
+%assert(all(f > eps & f <= fs/2),'Sinusoidal frequencies must lie in range (0 .. Nyqvist]');
 nf = size(f,1);
 
 if isscalar(sw)
