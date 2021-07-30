@@ -18,7 +18,11 @@ fprintf('[MVGC2 startup] Initialising MVGC2 toolbox\n');
 
 % Set configuration options: look first for config.m in this directory, else run default
 
-if exist('config.m','file') == 2
+% if exist('config.m','file') == 2 is unreliable, as there might already be
+% a config.m on the PATH, which 'exist' will pick up!!! Thus we simply look
+% up the actual filename in directory listing 'ls'.
+
+if any(strcmpi(split(ls),'config.m'))
 	fprintf('[MVGC2 startup] Setting user configuration options\n');
 	config;
 else
