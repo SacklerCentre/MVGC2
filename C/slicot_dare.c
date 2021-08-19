@@ -1,52 +1,18 @@
+// Use Makefile in this directory to build .mex
+
 #include "mex.h"
 #include <string.h> // for memcpy
 
-/*
-
-mex slicot_dlyap.c -lslicot
-
-*/
-
 #define UNUSED __attribute__ ((unused))
 
-typedef mwSignedIndex fint;
-typedef ??? flog;
+typedef long fint;
+typedef long flog;
 
-/*
-  SB02OD
-
-  To solve for X either the continuous-time algebraic Riccati
-  equation
-                           -1
-     Q + A'X + XA - (L+XB)R  (L+XB)' = 0                       (1)
-
-  or the discrete-time algebraic Riccati equation
-                                  -1
-     X = A'XA - (L+A'XB)(R + B'XB)  (L+A'XB)' + Q              (2)
-
-  where A, B, Q, R, and L are N-by-N, N-by-M, N-by-N, M-by-M and
-  N-by-M matrices, respectively, such that Q = C'C, R = D'D and
-  L = C'D; X is an N-by-N symmetric matrix.
-  The routine also returns the computed values of the closed-loop
-  spectrum of the system, i.e., the stable eigenvalues lambda(1),
-  ..., lambda(N) of the corresponding Hamiltonian or symplectic
-  pencil, in the continuous-time case or discrete-time case,
-  respectively.
-                           -1
-  Optionally, matrix G = BR  B' may be given instead of B and R.
-  Other options include the case with Q and/or R given in a
-  factored form, Q = C'C, R = D'D, and with L a zero matrix.
-
-  The routine uses the method of deflating subspaces, based on
-  reordering the eigenvalues in a generalized Schur matrix pair.
-  A standard eigenproblem is solved in the continuous-time case
-  if G is given.
-*/
+#define MAX(x1,x2) ((x1) >= (x2) ? (x1) : (x2))
+#define MAX3(x1,x2,x3) (MAX(MAX(x1,x2),x3))
+#define MAX4(x1,x2,x3,x4) (MAX(MAX(x1,x2),MAX(x3,x4)))
 
 fint sb02od_(
-};
-
-fint sb03md_(
 	const char*   const dico,
 	const char*   const jobb,
 	const char*   const fact,
@@ -86,8 +52,6 @@ fint sb03md_(
 	      fint*   const info
 );
 
-// Parameters: A, B, Q, R, and L are N-by-N, N-by-M, N-by-N, M-by-M and N-by-M matrices, respectively
-
 void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArray *prhs[])
 {
 	// Job constants
@@ -108,7 +72,6 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	const size_t N  = (size_t)n;
 	const size_t N2 = 2*N;
 	const size_t M  = (size_t)m;
-	const size_t NM2 = N2+M;
 
 	const fint lda = n;
 	const fint ldb = n;
@@ -120,83 +83,99 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	const fint ldt = 2*n+m;
 	const fint ldu = 2*n;
 
+	const fint liwork = (fint)MAX(M,N2);
+	const fint ldwork = (fint)MAX4(7*(2*N+1)+16,16*N,2*N+M,3*M);
+	const fint lbwork = (fint)N2;
+
 	// Input matrices
 
-	double* const a = mxGetPr(prhs[0]);
-	double* const b = mxGetPr(prhs[1]);
-	double* const q = mxGetPr(prhs[2]);
-	double* const r = mxGetPr(prhs[3]);
-	double* const l = mxGetPr(prhs[4]);
+	double* const a = mxGetDoubles(prhs[0]);
+	double* const b = mxGetDoubles(prhs[1]);
+	double* const q = mxGetDoubles(prhs[2]);
+	double* const r = mxGetDoubles(prhs[3]);
+	double* const l = mxGetDoubles(prhs[4]);
 
 	// Output matrices
 
-	double* const x      = mxGetPr(plhs[0] = mxCreateDoubleMatrix(N, N,   mxREAL));
-	double* const rcond  = mxGetPr(plhs[1] = mxCreateDoubleMatrix(1, 1,   mxREAL));
-	double* const alphar = mxGetPr(plhs[2] = mxCreateDoubleMatrix(N2,N2,  mxREAL));
-	double* const alphai = mxGetPr(plhs[3] = mxCreateDoubleMatrix(N2,N2,  mxREAL));
-	double* const beta   = mxGetPr(plhs[4] = mxCreateDoubleMatrix(N2,N2,  mxREAL));
-	double* const s      = mxGetPr(plhs[5] = mxCreateDoubleMatrix(N2,NM2, mxREAL));
-	double* const t      = mxGetPr(plhs[6] = mxCreateDoubleMatrix(N2,NM2, mxREAL));
-	double* const u      = mxGetPr(plhs[6] = mxCreateDoubleMatrix(N2,N2,  mxREAL));
+	double* const x      = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix(N, N,   mxREAL));
+	double* const alphar = mxGetDoubles(plhs[3] = mxCreateDoubleMatrix(N2,1,   mxREAL));
+	double* const alphai = mxGetDoubles(plhs[4] = mxCreateDoubleMatrix(N2,1,   mxREAL));
+	double* const beta   = mxGetDoubles(plhs[5] = mxCreateDoubleMatrix(N2,1,   mxREAL));
+
+	fint   info;
+	double rcond;
+
+	// Actually we don't return these; we treat them as workspace matrices
+
+	double* const s = mxCalloc((size_t)(lds*lds),sizeof(double));
+	double* const t = mxCalloc((size_t)ldt*N2,   sizeof(double));
+	double* const u = mxCalloc((size_t)ldu*N2,   sizeof(double));
 
 	// Workspace matrices
 
-	fint*   const iwork = mxCalloc(MAX(M,N2),sizeof(fint));
-	double* const dwork = mxCalloc(MAX(7*(2*N+1)+16,16*N,2*N+M,3*M),sizeof(double));
-	double* const bwork = mxCalloc(N2,sizeof(double));
+	fint*   const iwork = mxCalloc((size_t)liwork,sizeof(fint));
+	double* const dwork = mxCalloc((size_t)ldwork,sizeof(double));
+	flog*   const bwork = mxCalloc((size_t)lbwork,sizeof(flog));
 
+//	mexPrintf("liwork = %ld\n",liwork);
+//	mexPrintf("ldwork = %ld\n",ldwork);
+//	mexPrintf("lbwork = %ld\n",lbwork);
 
-	const   fint   n      = (fint)mxGetM(prhs[0]);
-	const   size_t N      = (size_t)n;
-	double* const  a      = mxGetPr(prhs[0]);
-	const   fint   lda    = n;
-	double* const  u      = mxCalloc((size_t)(n*n),sizeof(double));
-	const   fint   ldu    = n;
-	double* const  c      = mxGetPr(prhs[1]);
-	const   fint   ldc    = n;
-	const   double scale  = 1.0;
-	const   double sep    = 0.0;
-	const   double ferr   = 0.0;
-	double* const  wr     = mxCalloc(N,sizeof(double));
-	double* const  wi     = mxCalloc(N,sizeof(double));
-	const   fint   iwork  = 0;
-	const   fint   ldwork = 2*n*n+3*n;
-	double* const  dwork  = mxCalloc((size_t)ldwork,sizeof(double));
-	fint           info   = 0;
-	double* const  A      = mxCalloc(N*N,sizeof(double));
-	double* const  C      = mxGetPr(plhs[0] = mxCreateDoubleMatrix(N,N,mxREAL));
+	// Other parameters
 
-	memcpy(A,a,N*N*sizeof(double));
-	memcpy(C,c,N*N*sizeof(double));
+	const double tol = 0.0; // default tolerance
 
-	// mexPrintf("*** sb03md in\n");
-	sb03md_(
+//	mexPrintf("*** sb02od in\n");
+	sb02od_(
 		&dico,
-		&job,
+		&jobb,
 		&fact,
-		&trana,
+		&uplo,
+		&jobl,
+		&sort,
 		&n,
-		A,
+		&m,
+		&p,
+	    a,
 		&lda,
+	    b,
+		&ldb,
+		q,
+		&ldq,
+		r,
+		&ldr,
+		l,
+		&ldl,
+		&rcond,
+		x,
+		&ldx,
+		alphar,
+		alphai,
+		beta,
+		s,
+		&lds,
+		t,
+		&ldt,
 		u,
 		&ldu,
-		C,
-		&ldc,
-		&scale,
-		&sep,
-		&ferr,
-		wr,
-		wi,
-		&iwork,
+		&tol,
+		iwork,
 		dwork,
 		&ldwork,
+		bwork,
 		&info
 	);
-	// mexPrintf("*** sb03md out\n");
+//	mexPrintf("*** sb02od out\n");
 
+	plhs[1] = mxCreateDoubleScalar((double)info);
+	plhs[2] = mxCreateDoubleScalar(rcond);
+
+	// Deallocate workspace matrices
+
+	mxFree(bwork);
 	mxFree(dwork);
-	mxFree(wi);
-	mxFree(wr);
+	mxFree(iwork);
 	mxFree(u);
-	mxFree(A);
+	mxFree(t);
+	mxFree(s);
 }

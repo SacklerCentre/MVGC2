@@ -1,15 +1,11 @@
+// Use Makefile in this directory to build .mex
+
 #include "mex.h"
 #include <string.h> // for memcpy
 
-/*
-
-mex slicot_dlyap.c -lslicot
-
-*/
-
 #define UNUSED __attribute__ ((unused))
 
-typedef mwSignedIndex fint;
+typedef long fint;
 
 fint sb03md_(
 	const char*   const dico,
@@ -36,32 +32,40 @@ fint sb03md_(
 
 void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArray *prhs[])
 {
-	const   fint   n      = (fint)mxGetM(prhs[0]);
-	const   size_t N      = (size_t)n;
-	const   char   dico   = 'D';
-	const   char   job    = 'X';
-	const   char   fact   = 'N';
-	const   char   trana  = 'T';
-	double* const  a      = mxGetPr(prhs[0]);
-	const   fint   lda    = n;
-	double* const  u      = mxCalloc((size_t)(n*n),sizeof(double));
-	const   fint   ldu    = n;
-	double* const  c      = mxGetPr(prhs[1]);
-	const   fint   ldc    = n;
-	const   double scale  = 1.0;
-	const   double sep    = 0.0;
-	const   double ferr   = 0.0;
-	double* const  wr     = mxCalloc(N,sizeof(double));
-	double* const  wi     = mxCalloc(N,sizeof(double));
-	const   fint   iwork  = 0;
-	const   fint   ldwork = 2*n*n+3*n;
-	double* const  dwork  = mxCalloc((size_t)ldwork,sizeof(double));
-	fint           info   = 0;
-	double* const  A      = mxCalloc(N*N,sizeof(double));
-	double* const  C      = mxGetPr(plhs[0] = mxCreateDoubleMatrix(N,N,mxREAL));
+	const mwSize  N      = mxGetM(prhs[0]);
+	const mwSize  NSQ    = N*N;
+	const fint    n      = (fint)N;
+	const char    dico   = 'D';
+	const char    job    = 'X';
+	const char    fact   = 'N';
+	const char    trana  = 'T';
 
-	memcpy(A,a,N*N*sizeof(double));
-	memcpy(C,c,N*N*sizeof(double));
+	const double* const a = mxGetDoubles(prhs[0]);
+	const fint    lda     = n;
+	double* const u       = mxCalloc(NSQ,sizeof(double));
+	const fint    ldu     = n;
+	const double* const c = mxGetDoubles(prhs[1]);
+	const fint    ldc     = n;
+	const double  scale   = 1.0;
+	const double  sep     = 0.0;
+	const double  ferr    = 0.0;
+	double* const wr      = mxCalloc(N,sizeof(double));
+	double* const wi      = mxCalloc(N,sizeof(double));
+
+	const fint    iwork  = 0;
+	const fint    ldwork = 2*(fint)(NSQ+3*N); // reasonable?
+	double* const dwork  = mxCalloc((mwSize)ldwork,sizeof(double));
+	fint          info   = 0;
+
+	// Note that SLICOT SB03MD overwrites A, and also C (the result is returned in C)
+
+	// Take a copy of a
+	double* const A = mxCalloc(NSQ,sizeof(double));
+	memcpy(A,a,NSQ*sizeof(double));
+
+	// Take a copy of c, and assign as first output
+	double* const C = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix(N,N,mxREAL));
+	memcpy(C,c,NSQ*sizeof(double));
 
 	// mexPrintf("*** sb03md in\n");
 	sb03md_(
@@ -88,9 +92,9 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	);
 	// mexPrintf("*** sb03md out\n");
 
+	mxFree(A);
 	mxFree(dwork);
 	mxFree(wi);
 	mxFree(wr);
 	mxFree(u);
-	mxFree(A);
 }

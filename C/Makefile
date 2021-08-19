@@ -27,13 +27,13 @@ endif
 MEXEXT =  $(shell mexext)
 MEXDIR = ../mex
 
-MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slicot_dlyap.c
+MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slicot_dlyap.c slicot_dare.c
 # MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c
 MBIN   = $(patsubst %.c,$(MEXDIR)/%.$(MEXEXT),$(MSRC))
 
 MFLAGS  = -std=c99 -march=native
 WFLAGS  = -Wall -Wextra -Wconversion -Winline -pedantic-errors
-DFLAGS  = -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE -D$(OS)
+DFLAGS  = -D_POSIX_C_SOURCE=199309L -D_DEFAULT_SOURCE -D$(OS)
 LDFLAGS = -lmwblas -lmwlapack -lmwslicot
 ifeq ($(OS),WIN)
 	OFLAGS    = -O3
@@ -49,8 +49,7 @@ else
 	RMBIN     = $(MBIN)
 endif
 GCCFLAGS = $(MFLAGS) $(OFLAGS) $(WFLAGS) $(DFLAGS)
-MEXFLAGS = -O -largeArrayDims
-# MEXFLAGS = -O -R2018a
+MEXFLAGS = -O -R2018a
 
 CC  = gcc
 MEX = mex
