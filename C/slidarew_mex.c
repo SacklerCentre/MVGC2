@@ -8,9 +8,6 @@
 typedef long fint; // carefull - assumes C "long" matches SLICOT FORTRAN "INTEGER"!
 typedef long flog; // carefull - assumes C "long" matches SLICOT FORTRAN "LOGICAL"!
 
-#define MAX(x1,x2) ((x1) >= (x2) ? (x1) : (x2))
-#define MAX4(x1,x2,x3,x4) (MAX(MAX(x1,x2),MAX(x3,x4)))
-
 fint sb02od_(
 	const char*   const dico,
 	const char*   const jobb,
@@ -67,7 +64,6 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	const fint n  = (fint)mxGetM(prhs[0]);
 	const fint m  = (fint)mxGetM(prhs[3]);
 	const fint p  = 0; // not used for fact == 'N'
-	const fint n2 = 2*n;
 
 	const fint lda = n;
 	const fint ldb = n;
@@ -75,9 +71,9 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	const fint ldr = m;
 	const fint ldl = n;
 	const fint ldx = n;
-	const fint lds = n2+m;
-	const fint ldt = n2+m;
-	const fint ldu = n2;
+	const fint lds = 2*n+m;
+	const fint ldt = 2*n+m;
+	const fint ldu = 2*n;
 
 	// Input matrices
 
@@ -89,35 +85,29 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 
 	// Output matrices
 
-	double* const x      = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix((mwSize)n, (mwSize)n, mxREAL));
-	double* const alphar = mxGetDoubles(plhs[4] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
-	double* const alphai = mxGetDoubles(plhs[5] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
-	double* const beta   = mxGetDoubles(plhs[6] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
+	double* const x = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix((mwSize)n,(mwSize)n,mxREAL));
 
 	fint   info;
 	double rcond;
 
-	// Although we could, we don't return these; we treat them as workspace matrices
+	// Actually we don't return these; we treat them as workspace matrices, preallocated
 
-	double* const s = mxCalloc((size_t)(lds*lds),sizeof(double));
-	double* const t = mxCalloc((size_t)(ldt*n2), sizeof(double));
-	double* const u = mxCalloc((size_t)(ldu*n2), sizeof(double));
+	double* const alphar = mxGetDoubles(prhs[5]);
+	double* const alphai = mxGetDoubles(prhs[6]);
+	double* const beta   = mxGetDoubles(prhs[7]);
+	double* const s      = mxGetDoubles(prhs[8]);
+	double* const t      = mxGetDoubles(prhs[9]);
+	double* const u      = mxGetDoubles(prhs[10]);
 
-	// Workspace matrices
+	// Workspace matrices, also preallocated
 
-	const fint ldw = (fint)mxGetScalar(prhs[5]);
+	const fint ldwork = (fint)mxGetNumberOfElements(prhs[12]);
 
-	const fint liwork = MAX(m,n2);
-	const fint ldwork = (ldw > 0 ? ldw : MAX4(7*(n2+1)+16,16*n,n2+m,3*m));
-	const fint lbwork = n2;
-
-	fint*   const iwork = mxCalloc((size_t)liwork,sizeof(fint));
-	double* const dwork = mxCalloc((size_t)ldwork,sizeof(double));
-	flog*   const bwork = mxCalloc((size_t)lbwork,sizeof(flog));
-
-//	mexPrintf("liwork = %ld\n",liwork);
 //	mexPrintf("ldwork = %ld\n",ldwork);
-//	mexPrintf("lbwork = %ld\n",lbwork);
+
+	fint*   const iwork = mxGetInt64s (prhs[11]); // carefull - assumes C "long" is Matlab "int64"!
+	double* const dwork = mxGetDoubles(prhs[12]);
+	flog*   const bwork = mxGetInt64s (prhs[13]); // carefull - assumes C "long" is Matlab "int64"!
 
 	// Other parameters
 
@@ -168,13 +158,4 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	plhs[1] = mxCreateDoubleScalar((double)info);
 	plhs[2] = mxCreateDoubleScalar(rcond);
 	plhs[3] = mxCreateDoubleScalar(dwork[0]); // if info == 0, this is the optimal ldwork
-
-	// Deallocate workspace matrices
-
-	mxFree(bwork);
-	mxFree(dwork);
-	mxFree(iwork);
-	mxFree(u);
-	mxFree(t);
-	mxFree(s);
 }
