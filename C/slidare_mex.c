@@ -9,7 +9,6 @@ typedef long fint;
 typedef long flog;
 
 #define MAX(x1,x2) ((x1) >= (x2) ? (x1) : (x2))
-#define MAX3(x1,x2,x3) (MAX(MAX(x1,x2),x3))
 #define MAX4(x1,x2,x3,x4) (MAX(MAX(x1,x2),MAX(x3,x4)))
 
 fint sb02od_(
@@ -65,13 +64,10 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 
 	// Array sizes
 
-	const fint n = (fint)mxGetM(prhs[0]);
-	const fint m = (fint)mxGetM(prhs[3]);
-	const fint p = 0; // not used for fact == 'N'
-
-	const size_t N  = (size_t)n;
-	const size_t N2 = 2*N;
-	const size_t M  = (size_t)m;
+	const fint n  = (fint)mxGetM(prhs[0]);
+	const fint m  = (fint)mxGetM(prhs[3]);
+	const fint p  = 0; // not used for fact == 'N'
+	const fint n2 = 2*n;
 
 	const fint lda = n;
 	const fint ldb = n;
@@ -83,10 +79,6 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	const fint ldt = 2*n+m;
 	const fint ldu = 2*n;
 
-	const fint liwork = (fint)MAX(M,N2);
-	const fint ldwork = (fint)MAX4(7*(2*N+1)+16,16*N,2*N+M,3*M);
-	const fint lbwork = (fint)N2;
-
 	// Input matrices
 
 	double* const a = mxGetDoubles(prhs[0]);
@@ -97,10 +89,10 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 
 	// Output matrices
 
-	double* const x      = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix(N, N,   mxREAL));
-	double* const alphar = mxGetDoubles(plhs[3] = mxCreateDoubleMatrix(N2,1,   mxREAL));
-	double* const alphai = mxGetDoubles(plhs[4] = mxCreateDoubleMatrix(N2,1,   mxREAL));
-	double* const beta   = mxGetDoubles(plhs[5] = mxCreateDoubleMatrix(N2,1,   mxREAL));
+	double* const x      = mxGetDoubles(plhs[0] = mxCreateDoubleMatrix((mwSize)n, (mwSize)n, mxREAL));
+	double* const alphar = mxGetDoubles(plhs[4] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
+	double* const alphai = mxGetDoubles(plhs[5] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
+	double* const beta   = mxGetDoubles(plhs[6] = mxCreateDoubleMatrix((mwSize)n2,1,         mxREAL));
 
 	fint   info;
 	double rcond;
@@ -108,10 +100,16 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 	// Actually we don't return these; we treat them as workspace matrices
 
 	double* const s = mxCalloc((size_t)(lds*lds),sizeof(double));
-	double* const t = mxCalloc((size_t)ldt*N2,   sizeof(double));
-	double* const u = mxCalloc((size_t)ldu*N2,   sizeof(double));
+	double* const t = mxCalloc((size_t)(ldt*n2), sizeof(double));
+	double* const u = mxCalloc((size_t)(ldu*n2), sizeof(double));
 
 	// Workspace matrices
+
+	const fint ldw = (fint)mxGetScalar(prhs[5]);
+
+	const fint liwork = MAX(m,n2);
+	const fint ldwork = (ldw > 0 ? ldw : MAX4(7*(n2+1)+16,16*n,n2+m,3*m));
+	const fint lbwork = n2;
 
 	fint*   const iwork = mxCalloc((size_t)liwork,sizeof(fint));
 	double* const dwork = mxCalloc((size_t)ldwork,sizeof(double));
@@ -169,6 +167,7 @@ void mexFunction(int UNUSED nlhs, mxArray *plhs[], int UNUSED nrhs, const mxArra
 
 	plhs[1] = mxCreateDoubleScalar((double)info);
 	plhs[2] = mxCreateDoubleScalar(rcond);
+	plhs[3] = mxCreateDoubleScalar(dwork[0]); // if info == 0, this is the optimal ldwork
 
 	// Deallocate workspace matrices
 

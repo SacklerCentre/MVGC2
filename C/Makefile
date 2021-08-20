@@ -27,7 +27,7 @@ endif
 MEXEXT =  $(shell mexext)
 MEXDIR = ../mex
 
-MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slicot_dlyap.c slicot_dare.c
+MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slidlyap_mex.c slidare_mex.c
 # MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c
 MBIN   = $(patsubst %.c,$(MEXDIR)/%.$(MEXEXT),$(MSRC))
 
@@ -62,8 +62,9 @@ clean:
 	$(RM) $(RMBIN)
 
 diag:
-	@echo "*** MSRC = " $(MSRC)
-	@echo "*** MBIN = " $(MBIN)
+	@echo "*** MSRC   = " $(MSRC)
+	@echo "*** MBIN   = " $(MBIN)
+	@echo "*** MEXEXT = " $(MEXEXT)
 
 $(MEXDIR)/%.$(MEXEXT): %.c
 	@echo
