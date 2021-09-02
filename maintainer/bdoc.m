@@ -24,6 +24,11 @@ fprintf(2,'Sorry, didn''t find any help for ''%s''\n',fstr);
 
 function success = disdoc(docroot,fstr,browser)
 
+if exist(docroot) ~= 7
+	fprintf(2,'Docs search path ''%s'' doesn''t exist\n',fstr);
+	success = false;
+	return
+end
 [status, dpath] = system(['find ' docroot ' -iname ' fstr '.html']);
 assert(status == 0,'''find'' call failed');
 success = ~isempty(dpath);
