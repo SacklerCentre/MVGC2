@@ -1,8 +1,8 @@
-function [fres,frpow2,diff] = iss2fres(A,C,K,V,tol,minpow2,maxpow2)
+function [fres,frpow2,diff] = iss2fres(A,C,K,V,siparms)
 
-if nargin < 5 || isempty(tol), tol = 0; end
+acfres = nargin < 5 || isempty(siparms);
 
-if abs(tol) < eps % i.e., zero
+if acfres
 
 	% Calculate frequency resolution on the basis of autocorrelation decay to machine precision
 
@@ -25,7 +25,11 @@ else
 
 	% Calculate frequency resolution on the basis of spectral integral of logdet|S| = logdet|V|
 
-	assert(nargin == 7,'Must supply minimum and maximum powers of 2');
+	assert(isvector(siparms) && length(siparms) == 3,'Spetral integration parameters must be a 3-vector [tolerance, fres pow2 min, fres pow2 max]');
+
+	tol     = siparms(1);
+	minpow2 = siparms(2);
+	maxpow2 = siparms(3);
 
 	L = chol(V,'lower');
 	LDV = 2*sum(log(diag(L)));
