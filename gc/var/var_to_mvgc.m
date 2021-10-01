@@ -1,4 +1,4 @@
-function [F,pval] = var_to_mvgc(A,V,x,y,X,regmode)
+function [F,pval,cval] = var_to_mvgc(A,V,x,y,X,regmode,alpha)
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
@@ -24,9 +24,9 @@ F = NaN;
 if sserror(rep), return; end % check DARE report, bail out on error
 F = logdet(VR(xr,xr)) - logdet(V(x,x));
 
-if nargout > 1 % calculate stats
-	assert(nargin > 5, 'Must supply regression mode for stats (same mode as used for VAR model estimate)');
-	assert(~isempty(X),'Must supply time-series data for stats');
+if nargout > 1 % calculate p-values
+	assert(nargin > 5, 'Must supply regression mode for p-values (same mode as used for VAR model estimate)');
+	assert(~isempty(X),'Must supply time-series data for p-values');
 	[n1,m,N] = size(X);
 	assert(n1 == n,    'Time series does not match VAR coefficients matrix');
 	M  = N*(m-p);      % chi^2 scaling factor = effective number of observations
@@ -38,4 +38,9 @@ if nargout > 1 % calculate stats
 	LRstat  = logdet(VR(xr,xr)) - logdet(V(x,x)); % likelihood-ratio test statistic
 	pval.FT = 1-fcdf(K*FTstat,d,d2);
 	pval.LR = 1-chi2cdf(M*LRstat,d);
+	if nargin > 2
+		assert(nargin > 6, 'Must supply significance level for critical values');
+		cval.FT = finv(1-alphad,d2)/K;
+		cval.LR = chi2inv(1-alpha,d)/M;
+	end
 end
