@@ -6,7 +6,7 @@
 %
 %% Syntax
 %
-%     psig = mhtcorrect(pval,alpha,correction)
+%     pcrit = mhtcorrect(pval,alpha,correction)
 %
 %% Arguments
 %
@@ -62,7 +62,7 @@ function pcrit = mhtcorrect(pval,alpha,correction)
 
 % some methods don't require actual p-values
 
-no_pvals = (isscalar(pval) & pval < 0); % -pval is now just the number of tests
+no_pvals = (isscalar(pval) && pval < 0); % -pval is now just the number of tests
 
 if no_pvals
 	n = -pvals;
@@ -96,11 +96,10 @@ switch upper(correction)
 		pcrit = fdr_bh(pval,alpha,false);
 
     otherwise
-
 		error('Unknown correction method');
 end
 
-function pcrit = fdr_bh(p,q,pdep)
+function pcrit = fdr_bh(pvals,q,pdep)
 
 % Executes the Benjamini & Hochberg (1995) procedure for
 % controlling the false discovery rate (FDR) of a family of
@@ -120,24 +119,18 @@ function pcrit = fdr_bh(p,q,pdep)
 % University of California, San Diego
 % March 24, 2010
 
-s = size(p);
-if length(s) > 2 || s(1) > 1
-    psorted = sort(reshape(p,1,prod(s)));
-else % p-values are already a row vector
-    psorted = sort(p);
-end
-m = length(psorted); % number of tests
+psorted = sort(pvals(:)');
 
+m = length(psorted); %number of tests
 if pdep % BH procedure for independence or positive dependence
-    thresh = (1:m)*q/m;
+	thresh = (1:m)*q/m;
 else    % BH procedure for any dependency structure
-    thresh = (1:m)*q/(m*sum(1./(1:m)));
+	thresh = (1:m)*q/(m*sum(1./(1:m)));
 end
 
-rej = psorted <= thresh;
-max_id = find(rej,1,'last'); % find greatest significant pvalue
-if isempty(max_id),
+maxidx = find(psorted <= thresh,1,'last'); %find greatest significant pvalue
+if isempty(maxidx),
     pcrit = 0;
 else
-    pcrit = psorted(max_id);
+    pcrit = psorted(maxidx);
 end

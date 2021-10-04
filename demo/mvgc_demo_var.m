@@ -2,43 +2,43 @@
 
 % Test data generation
 
-ntrials   = 4;       % number of trials
-nobs      = 500;     % number of observations per trial
-fs        = 200;     % sample rate (Hz)
+if ~exist('ntrials',   'var'), ntrials   = 10;      end % number of trials
+if ~exist('nobs',      'var'), nobs      = 500;     end % number of observations per trial
+if ~exist('fs',        'var'), fs        = 200;     end % sample rate (Hz)
 
 % Actual VAR model generation parameters
 
-tnet      = tnet5;   % connectivity network
-moact     = 6;       % model order
-rho       = 0.95;    % spectral radius
-wvar      = 0.5;     % var coefficients decay weighting factor
-rmi       = 0.5;     % residuals log-generalised correlation (multi-information)
-                     % g = -log|R|. g = 0 yields zero correlation,g = [] is uniform random
-                     % on space of correlation matrices
-
+if ~exist('tnet',      'var'), tnet      = tnet5;   end % connectivity graph
+if ~exist('moact',     'var'), moact     = 6;       end % model order
+if ~exist('rho',       'var'), rho       = 0.95;    end % spectral radius
+if ~exist('wvar',      'var'), wvar      = 0.5;     end % var coefficients decay weighting factor
+if ~exist('rmi',       'var'), rmi       = 0.5;     end % residuals log-generalised correlation (multi-information)
+                                                        % g = -log|R|. g = 0 yields zero correlation,g = [] is uniform random
+                                                        % on space of correlation matrices
 % VAR model order estimation
 
-moregmode = 'LWR';   % VAR model estimation regression mode ('OLS' or 'LWR')
-mosel     = 'LRT';   % model order selection ('ACT', 'AIC', 'BIC', 'HQC', 'LRT', or supplied numerical value)
-momax     = 2*moact; % maximum model order for model order selection
+if ~exist('moregmode', 'var'), moregmode = 'LWR';   end % VAR model estimation regression mode ('OLS' or 'LWR')
+if ~exist('mosel',     'var'), mosel     = 'LRT';   end % model order selection ('ACT', 'AIC', 'BIC', 'HQC', 'LRT', or supplied numerical value)
+if ~exist('momax',     'var'), momax     = 2*moact; end % maximum model order for model order selection
 
 % VAR model parameter estimation
 
-regmode   = 'LWR';   % VAR model estimation regression mode ('OLS' or 'LWR')
+if ~exist('regmode',   'var'), regmode   = 'LWR';   end % VAR model estimation regression mode ('OLS' or 'LWR')
 
 % MVGC (time domain) statistical inference
 
-alpha     = 0.05;    % significance level for Granger casuality significance test
-mhtc      = 'FDRD';  % multiple hypothesis test correction (see routine 'significance')
+if ~exist('alpha',     'var'), alpha     = 0.05;    end % significance level for Granger casuality significance test
+if ~exist('tstat',     'var'), tstat     = 'F';     end % test statistic: 'F' or 'LR' (likelihood-ratio)
+if ~exist('mhtc',      'var'), mhtc      = 'FDRD';  end % multiple hypothesis test correction (see routine 'mhtcorrect')
 
 % MVGC (frequency domain)
 
-fres      = [];      % spectral MVGC frequency resolution (empty for automatic calculation)
+if ~exist('fres',      'var'), fres      = [];      end % spectral MVGC frequency resolution (empty for automatic calculation)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if ~exist('seed', 'var'), seed  = 0; end % random seed (0 for unseeded)
-if ~exist('plotm','var'), plotm = 0; end % plot mode (figure number offset, or Gnuplot terminal string)
+if ~exist('seed',      'var'), seed      = 0;       end % random seed (0 for unseeded)
+if ~exist('plotm',     'var'), plotm     = 0;       end % plot mode (figure number offset, or Gnuplot terminal string)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -123,14 +123,17 @@ assert(~info.error,'VAR error(s) found - bailing out');
 % Estimated time-domain pairwise-conditional Granger causalities
 
 ptic('*** var_to_pwcgc... ');
-[F,pval] = var_to_pwcgc(A,V,X,regmode);
+F = var_to_pwcgc(A,V,X,regmode);
 ptoc;
 assert(~isbad(F,false),'GC estimation failed');
 
+% Calculate p-values for test statistics (F or likelihood ratio)
+
+pval = var_to_pwcgc_stats(X,V,morder,regmode,tstat);
+
 % Significance test (F-test and likelihood ratio), adjusting for multiple hypotheses.
 
-sigFT = significance(pval.FT,alpha,mhtc);
-sigLR = significance(pval.LR,alpha,mhtc);
+sig = mvgc_H0_test(pval,alpha,mhtc);
 
 % For comparison, we also calculate the actual pairwise-conditional causalities
 
@@ -142,11 +145,11 @@ assert(~isbad(FF,false),'GC calculation failed');
 % Plot time-domain causal graph and significance.
 
 maxF = 1.1*max(nanmax(F(:),nanmax(FF(:))));
-pdata = {FF,F;sigFT,sigLR};
-ptitle = {'PWCGC (actual)','PWCGC (estimated)'; 'F-test','LR test'};
-maxp = [maxF maxF;1 1];
+pdata = {FF,F,sig};
+ptitle = {'PWCGC (actual)','PWCGC (estimated)',[tstat '-test']};
+maxp = [maxF,maxF,1];
 if isnumeric(plotm), plotm = plotm+1; end
-plot_gc(pdata,ptitle,[],maxp,plotm);
+plot_gc(pdata,ptitle,[],maxp,plotm,[0.6,2.5]);
 
 %% Granger causality estimation: frequency domain
 
