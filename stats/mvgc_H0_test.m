@@ -4,7 +4,7 @@ function [sig,pcrit,cval] = mvgc_H0_test(pval,alpha,mhtc,tstat,nx,ny,nz,p,m,N)
 
 pcrit = mhtcorrect(pval,alpha,mhtc); % crtitical p-value at given significance level with multiple hypotheses correction
 
-sig = 0+(pval <= pcrit); % reject H0 when sig is true (0+ converts to double)
+sig = 0+(pval < pcrit+eps); % reject H0 when sig is true (0+ converts to double)
 sig(isnan(pval)) = NaN;  % ensure NaNs in the right places!
 
 if nargout > 1 % want critical values too
