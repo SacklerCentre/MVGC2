@@ -2,7 +2,7 @@
 %
 % Return critical p-value corrected for multiple hypotheses tests
 %
-% <matlab:open('significance.m') code>
+% <matlab:open('mhtcorrect.m') code>
 %
 %% Syntax
 %
@@ -36,8 +36,8 @@
 %
 % Given multiple p-values, multiple hypothesis tests may be performed as
 %
-%     psig = mhtcorrect(pval,alpha,correction);
-%     h = pval <= pcrit;
+%     pcrit = mhtcorrect(pval,alpha,correction);
+%     sig = pval <= pcrit;
 %
 %% References
 %
@@ -58,7 +58,17 @@
 %
 %%
 
-function pcrit = mhtcorrect(pval,alpha,correction)
+function pcrit = mhtcorrect(pval,alpha,correction,sym)
+
+if nargin < 4 || isempty(sym), sym = false; end
+
+if sym % for symmetric matrices, only use upper triangle
+	[n,n1] = size(pval);
+	assert(ismatrix(pval) && n1 == n,'p-values must be a square symmetric matrix');
+	utidx = logical(triu(ones(n),1)); % logical indices of upper triangle
+	pcrit = mhtcorrect(pval(utidx),alpha,correction,false);
+	return
+end
 
 % some methods don't require actual p-values
 

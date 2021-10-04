@@ -1,4 +1,4 @@
-function [pval,stats] = var_to_pwcgc_stats(X,V,p,regmode,tstat)
+function [pval,stats] = pwcgc_var_stats(X,V,p,regmode,tstat)
 
 % Return pairwise-continuous Granger causality test statistics
 % (F or likelihood ratio) and p-values.

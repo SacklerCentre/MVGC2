@@ -1,4 +1,4 @@
-function [pval,stat] = var_to_mvgc_stats(X,V,p,x,y,regmode,tstat)
+function [pval,stat] = mvgc_var_stats.m(X,V,p,x,y,regmode,tstat)
 
 % Return multivariate Granger causality test statistic
 % (F or likelihood ratio) and p-value.

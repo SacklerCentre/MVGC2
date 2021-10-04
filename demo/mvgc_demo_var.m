@@ -120,18 +120,18 @@ assert(~info.error,'VAR error(s) found - bailing out');
 
 % Granger causality calculation: time domain
 
-% Estimated time-domain pairwise-conditional Granger causalities
+% Estimate time-domain pairwise-conditional GC (information transfer rate in nats/second)
 
 ptic('*** var_to_pwcgc... ');
 F = var_to_pwcgc(A,V,X,regmode);
 ptoc;
 assert(~isbad(F,false),'GC estimation failed');
 
-% Calculate p-values for test statistics (F or likelihood ratio)
+% Calculate p-values for time-domain pairwise-conditional GC hypothesis test (F or likelihood-ratio chi^2 test)
 
-pval = var_to_pwcgc_stats(X,V,morder,regmode,tstat);
+pval = pwcgc_var_stats(X,V,morder,regmode,tstat);
 
-% Significance test (F-test and likelihood ratio), adjusting for multiple hypotheses.
+% Significance test p-values (F or likelihood-ratio chi^2 test), correcting for multiple hypotheses.
 
 sig = mvgc_H0_test(pval,alpha,mhtc);
 
