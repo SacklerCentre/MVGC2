@@ -164,8 +164,8 @@ plot_gc(pdata,ptitle,[],maxp,plotm,[0.6,2.5]);
 % sensible. Warn if resolution is very large, as this may cause problems.
 
 if isempty(fres)
+	fres = var2fres(A,V);
 	maxfres = 2^14; % adjust to taste
-	fres = max(info.fres,infoo.fres);
 	if fres > maxfres
 		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
 		fres = maxfres;
