@@ -10,10 +10,10 @@ else
 	error('Unknown test statistic');
 end
 
-n = nx+ny+nz;
 d = p*nx*ny; % Degrees of freedom
 M = N*(m-p); % effective number of observations
 if ftest
+	n = nx+ny+nz;
 	d2 = nx*(M-p*n)-1; % F df2
 	sf = d2/d;         % F scaling factor
 	cval = finv(1-pcrit,d,d2)/sf;
