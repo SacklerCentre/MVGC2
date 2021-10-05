@@ -1,68 +1,23 @@
-%% mvgc_pval
-%
-% p-values for sample MVGC based on theoretical asymptotic null distribution
-%
-% <matlab:open('mvgc_pval.m') code>
-%
-%% Syntax
-%
-%     pval = mvgc_pval(x,p,m,N,nx,ny,nz)
-%
-%% Arguments
-%
-% See also <mvgchelp.html#4 Common variable names and data structures>.
-%
-% _input_
-%
-%     x          matrix of MVGC values
-%     p          VAR model order
-%     m          number of observations per trial
-%     N          number of trials
-%     nx         number of target ("to") variables
-%     ny         number of source ("from") variables
-%     nz         number of conditioning variables (default: 0)
-%
-% _output_
-%
-%     pval       matrix of p-values
-%
-%% Description
-%
-% Returns p-values |pval| for sample MVGCs in |x|, based on theoretical
-% (asymptotic) null distribution. |NaN| s are ignored. See <mvgc_cdf.html
-% |mvgc_cdf|> for details of other parameters.
-%
-% *_Important:_* To test p-values for statistical significance you should
-% correct for multiple null hypotheses; see routine <significance.html
-% |significance|>.
-%
-%% References
-%
-% [1] L. Barnett and A. K. Seth,
-% <http://www.sciencedirect.com/science/article/pii/S0165027013003701 The MVGC
-%     Multivariate Granger Causality Toolbox: A New Approach to Granger-causal
-% Inference>, _J. Neurosci. Methods_ 223, 2014
-% [ <matlab:open('mvgc_preprint.pdf') preprint> ].
-%
-%% See also
-%
-% <mvgc_cdf.html |mvgc_cdf|> |
-% <mvgc_cdfi.html |mvgc_cdfi|> |
-% <mvgc_confint.html |mvgc_confint|> |
-% <mvgc_cval.html |mvgc_cval|> |
-% <mvgc_demo.html |mvgc_demo|> |
-% <significance.html |significance|>
-%
-% (C) Lionel Barnett and Anil K. Seth, 2012. See file license.txt in
-% installation directory for licensing terms.
-%
-%%
+function pval = mvgc_pval(stat,tstat,nx,ny,nz,p,m,N)
 
-function pval = mvgc_pval(x,p,m,N,nx,ny,nz,~)
+% Return p-values for var GC test statistics (F or likelihood-ratio chi^2)
 
-if nargin < 7, nz    = []; end % ensure default
+if strcmpi(tstat,'F')
+	ftest = true;
+elseif strcmpi(tstat,'LR')
+	ftest = false;
+else
+	error('Unknown test statistic');
+end
 
-pval = NaN(size(x)); % output p-value matrix is same shape as x matrix
-nn   = ~isnan(x);    % indices of non-NaN x values (logical array)
-x    = x(nn);        % vectorise non-NaN x values
-pval(nn) = 1-mvgc_cdf(x,[],p,m,N,nx,ny,nz); % assume null hypothesis F = 0
+n = nx+ny+nz;
+d = p*nx*ny; % Degrees of freedom
+M = N*(m-p); % effective number of observations
+if ftest
+	d2 = nx*(M-p*n)-1; % F df2
+	sf = d2/d;         % F scaling factor
+	pval = 1-fcdf(sf*stat,d,d2);
+else
+	sf = M;            % chi^2 scaling factor
+	pval = 1-chi2cdf(sf*stat,d);
+end

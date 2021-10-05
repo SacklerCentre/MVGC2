@@ -1,4 +1,4 @@
-function F = var_to_pwcgc(A,V,X,regmode)
+function F = var_to_pwcgc(A,V)
 
 % Note that at the moment the "single regression" GC estimates
 % calculated here are only useful as an effect size, rather than

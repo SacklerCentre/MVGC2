@@ -1,4 +1,4 @@
-function [F,pval,cval] = var_to_mvgc(A,V,x,y,X,regmode,alpha)
+function F = var_to_mvgc(A,V,x,y)
 
 % Note that at the moment the "single regression" GC estimate
 % calculated here is only useful as an effect size, rather than

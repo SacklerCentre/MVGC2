@@ -1,63 +1,23 @@
-%% mvgc_cval
-%
-% Critical values for sample MVGC based on theoretical asymptotic null distribution
-%
-% <matlab:open('mvgc_cval.m') code>
-%
-%% Syntax
-%
-%     x = mvgc_cval(alpha,p,m,N,nx,ny,nz)
-%
-%% Arguments
-%
-% See also <mvgchelp.html#4 Common variable names and data structures>.
-%
-% _input_
-%
-%     alpha      vector of significance levels
-%     p          VAR model order
-%     m          number of observations per trial
-%     N          number of trials
-%     nx         number of target ("to") variables
-%     ny         number of source ("from") variables
-%     nz         number of conditioning variables (default: 0)
-%
-% _output_
-%
-%     x          vector of critical MVGC values
-%
-%% Description
-%
-% Returns critical MVGC values |x| at significance levels in |alpha| for sample
-% MVGC, based on theoretical (asymptotic) null distribution. See <mvgc_cdfi.html
-% |mvgc_cdfi|> for details of other parameters.
-%
-%% References
-%
-% [1] L. Barnett and A. K. Seth,
-% <http://www.sciencedirect.com/science/article/pii/S0165027013003701 The MVGC
-%     Multivariate Granger Causality Toolbox: A New Approach to Granger-causal
-% Inference>, _J. Neurosci. Methods_ 223, 2014
-% [ <matlab:open('mvgc_preprint.pdf') preprint> ].
-%
-%% See also
-%
-% <mvgc_cdf.html |mvgc_cdf|> |
-% <mvgc_cdfi.html |mvgc_cdfi|> |
-% <mvgc_pval.html |mvgc_pval|> |
-% <mvgc_confint.html |mvgc_confint|> |
-% <mvgc_demo_confint.html |mvgc_demo_confint|> |
-% <mvgc_demo_nonstationary.html |mvgc_demo_nonstationary|>
-%
-% (C) Lionel Barnett and Anil K. Seth, 2012. See file license.txt in
-% installation directory for licensing terms.
-%
-%%
+function cval = mvgc_cval(pcrit,tstat,nx,ny,nz,p,m,N)
 
-function x = mvgc_cval(alpha,p,m,N,nx,ny,nz,~)
+% Return critical values for var GC test statistics (F or likelihood-ratio chi^2)
 
-if nargin < 7, nz    = []; end % ensure default
+if strcmpi(tstat,'F')
+	ftest = true;
+elseif strcmpi(tstat,'LR')
+	ftest = false;
+else
+	error('Unknown test statistic');
+end
 
-assert(isvector(alpha),'significance levels must be a scalar or vector');
-
-x = mvgc_cdfi(1-alpha,[],p,m,N,nx,ny,nz); % assume null hypothesis F = 0
+n = nx+ny+nz;
+d = p*nx*ny; % Degrees of freedom
+M = N*(m-p); % effective number of observations
+if ftest
+	d2 = nx*(M-p*n)-1; % F df2
+	sf = d2/d;         % F scaling factor
+	cval = finv(1-pcrit,d,d2)/sf;
+else
+	sf = M;            % chi^2 scaling factor
+	cval = chi2inv(1-pcrit,d)/sf;
+end

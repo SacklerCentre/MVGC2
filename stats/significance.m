@@ -1,12 +1,12 @@
-%% mhtcorrect
+%% significance
 %
-% Return critical p-value corrected for multiple hypotheses tests
+% Return statistical significance and optionally critical p-values, corrected for multiple hypotheses tests
 %
-% <matlab:open('mhtcorrect.m') code>
+% <matlab:open('significance.m') code>
 %
 %% Syntax
 %
-%     pcrit = mhtcorrect(pval,alpha,correction)
+%     [sig,pcrit] = significance(pval,alpha,correction,sym)
 %
 %% Arguments
 %
@@ -17,27 +17,24 @@
 %     pval         p-values
 %     alpha        significance level
 %     correction   multiple hypotheses correction (see Description)
+%     sym          p-values are in a symmetric matrix; only test upper triangle (default: false)
 %
 % _output_
 %
+%     sig          statistical significance (1 = reject H0, 0 = can't reject H0
 %     pcrit        critical p-value
 %
 %% Description
 %
-% Returns critical p-value based on p-values in |pval|, which may be a scalar,
-% vector or matrix, and significance level |alpha|. NaNs are ignored. The
-% |correction| parameter specifies a multiple hypotheses test adjustment,
-% and may be one of: |'None'|, |'Bonferroni'|, |'Sidak'|, |'FDR'| (false
-% discovery rate, independent hypotheses or positively correlated hypotheses [1])
-% or |'FDRD'| (false discovery rate, arbitrary dependencies [2]).
+% Returns significance and critical p-value based on p-values in |pval|,
+% which may be a scalar,% vector or matrix, and significance level |alpha|.
+% NaNs are ignored. The |correction| parameter specifies a multiple hypotheses
+% test adjustment, and may be one of: |'None'|, |'Bonferroni'|, |'Sidak'|,
+% |'FDR'| (false discovery rate, independent hypotheses or positively correlated
+% hypotheses [1]) or |'FDRD'| (false discovery rate, arbitrary dependencies [2]).
 %
 % *_Note:_* |correction = 'None'| is not recommended for multiple
 % hypotheses, so is _not_ the default! |'FDRD'| is generally a good choice.
-%
-% Given multiple p-values, multiple hypothesis tests may be performed as
-%
-%     pcrit = mhtcorrect(pval,alpha,correction);
-%     sig = pval <= pcrit;
 %
 %% References
 %
@@ -50,15 +47,14 @@
 %
 %% See also
 %
-% <var_to_mvgc_stats.html |var_to_mvgc_stats|> |
-% <empirical_pval.html |empirical_pval|>
+% <mvgc_pval.html |mvgc_pval|>
 %
 % (C) Lionel Barnett and Anil K. Seth, 2012. See file license.txt in
 % installation directory for licensing terms.
 %
 %%
 
-function pcrit = mhtcorrect(pval,alpha,correction,sym)
+function [sig,pcrit] = significance(pval,alpha,correction,sym)
 
 if nargin < 4 || isempty(sym), sym = false; end
 
@@ -66,9 +62,12 @@ if sym % for symmetric matrices, only use upper triangle
 	[n,n1] = size(pval);
 	assert(ismatrix(pval) && n1 == n,'p-values must be a square symmetric matrix');
 	utidx = logical(triu(ones(n),1)); % logical indices of upper triangle
-	pcrit = mhtcorrect(pval(utidx),alpha,correction,false);
+	[sig,pcrit] = significance(pval(utidx),alpha,correction,false);
 	return
 end
+
+sig = NaN(size(pval)); % same shape as p-value array
+fi  = isfinite(pval);  % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
 
 % some methods don't require actual p-values
 
@@ -108,6 +107,9 @@ switch upper(correction)
     otherwise
 		error('Unknown correction method');
 end
+
+sig(fi) = 0+(pval < pcrit+eps); % reject H0 when sig is true (0+ converts to double)
+                                % finites will be in same positions as they were in original p-value array
 
 function pcrit = fdr_bh(pvals,q,pdep)
 

@@ -2,11 +2,11 @@
 
 % Test data generation
 
-if ~exist('ntrials',   'var'), ntrials   = 10;      end % number of trials
+if ~exist('ntrials',   'var'), ntrials   = 5;       end % number of trials
 if ~exist('nobs',      'var'), nobs      = 500;     end % number of observations per trial
 if ~exist('fs',        'var'), fs        = 200;     end % sample rate (Hz)
 
-% Actual VAR model generation parameters
+% VAR model parameters
 
 if ~exist('tnet',      'var'), tnet      = tnet5;   end % connectivity graph
 if ~exist('moact',     'var'), moact     = 6;       end % model order
@@ -123,17 +123,23 @@ assert(~info.error,'VAR error(s) found - bailing out');
 % Estimate time-domain pairwise-conditional GC (information transfer rate in nats/second)
 
 ptic('*** var_to_pwcgc... ');
-F = var_to_pwcgc(A,V,X,regmode);
+F = var_to_pwcgc(A,V);
 ptoc;
 assert(~isbad(F,false),'GC estimation failed');
 
-% Calculate p-values for time-domain pairwise-conditional GC hypothesis test (F or likelihood-ratio chi^2 test)
+% Calculate test statistics (F or likelihood-ratio chi^2 test) for time-domain pairwise-conditional GC hypothesis test
 
-pval = pwcgc_var_stats(X,V,morder,regmode,tstat);
+ptic('*** var_to_pwcgc_tstat... ');
+stat = var_to_pwcgc_tstat(X,V,morder,regmode,tstat);
+ptoc;
+
+% Calculate p-values for test statistics
+
+pval = mvgc_pval(stat,tstat,1,1,nvars-2,morder,nobs,ntrials); % for pairwise-conditional, nx = 1, ny = 1, nz = nvars-2
 
 % Significance test p-values (F or likelihood-ratio chi^2 test), correcting for multiple hypotheses.
 
-sig = mvgc_H0_test(pval,alpha,mhtc);
+sig = significance(pval,alpha,mhtc);
 
 % For comparison, we also calculate the actual pairwise-conditional causalities
 
