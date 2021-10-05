@@ -6,7 +6,8 @@
 %
 %% Syntax
 %
-%     [sig,pcrit] = significance(pval,alpha,correction,sym)
+%     [sig,pcrit] = significance(pval,alpha,correction,false)
+%     pcrit       = significance(nhyp,alpha,correction,true)
 %
 %% Arguments
 %
@@ -15,9 +16,10 @@
 % _input_
 %
 %     pval         p-values
+%     nhyp         number of hypotheses
 %     alpha        significance level
 %     correction   multiple hypotheses correction (see Description)
-%     sym          p-values are in a symmetric matrix; only test upper triangle (default: false)
+%     nopv         no p-values; first argument is number of hypotheses, only return critical p-value  (default: false)
 %
 % _output_
 %
@@ -54,30 +56,19 @@
 %
 %%
 
-function [sig,pcrit] = significance(pval,alpha,correction,sym)
+function [oarg1,oarg2] = significance(iarg1,alpha,correction,nopv)
 
-if nargin < 4 || isempty(sym), sym = false; end
+if nargin < 4 || isempty(nopv), nopv = false; end
 
-if sym % for symmetric matrices, only use upper triangle
-	[n,n1] = size(pval);
-	assert(ismatrix(pval) && n1 == n,'p-values must be a square symmetric matrix');
-	utidx = logical(triu(ones(n),1)); % logical indices of upper triangle
-	[sig,pcrit] = significance(pval(utidx),alpha,correction,false);
-	return
-end
-
-sig = NaN(size(pval)); % same shape as p-value array
-fi  = isfinite(pval);  % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
-
-% some methods don't require actual p-values
-
-no_pvals = (isscalar(pval) && pval < 0); % -pval is now just the number of tests
-
-if no_pvals
-	n = -pvals;
+if nopv % some methods don't require actual p-values, just the number of hypotheses
+	assert(nargout < 2,'"No p-values" option only returns one argument (critical p-value)!');
+	nhyp = iarg1;                % first input argument is the number of hypotheses
 else
-	pval = pval(isfinite(pval)); % vectorise the finite p-values (i.e., not NaN, Inf, etc.)
-	n = numel(pval);             % number of p-values being tested
+	pval  = iarg1;                % first input argument is array of p-values
+	oarg1 = NaN(size(pval));      % first return argument is significances - same shape as p-value array
+	fi    = isfinite(pval);       % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
+	pval  = pval(isfinite(pval)); % vectorise the finite p-values (i.e., not NaN, Inf, etc.)
+	nhyp  = numel(pval);          % number of hypotheses
 end
 
 switch upper(correction)
@@ -88,28 +79,32 @@ switch upper(correction)
 
     case 'BONFERRONI' % assumes independence of test statistics
 
-		pcrit = alpha/n;
+		pcrit = alpha/nhyp;
 
     case 'SIDAK' % assumes independence of test statistics
 
-		pcrit = 1-realpow(1-alpha,1/n);
+		pcrit = 1-realpow(1-alpha,1/nhyp);
 
     case 'FDR'   % assumes independence (or positive correlation) of test statistics (more powerful)
 
-		assert(~no_pvals,'Need actual p-values for this method');
+		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,true);
 
     case 'FDRD' %  possible dependencies - no correlation assumptions
 
-		assert(~no_pvals,'Need actual p-values for this method');
+		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,false);
 
     otherwise
 		error('Unknown correction method');
 end
 
-sig(fi) = 0+(pval < pcrit+eps); % reject H0 when sig is true (0+ converts to double)
-                                % finites will be in same positions as they were in original p-value array
+if nopv
+	oarg1 = pcrit;                    % first (and only) return argument is critical value
+else
+	oarg1(fi) = 0+(pval < pcrit+eps); % first return argument is significance; reject H0 when true (0+ converts to double), finites will be in same positions as they were in original p-value array
+	oarg2 = pcrit;                    % second return argument is critical value
+end
 
 function pcrit = fdr_bh(pvals,q,pdep)
 
