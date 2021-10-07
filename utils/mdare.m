@@ -2,7 +2,7 @@ function [K,V,rep,L,P] = mdare(A,C,Q,R,S)
 
 % Compute innovations form parameters for a state space model in general form by
 % solution of a discrete algebraic Riccati equation (DARE). This is a "stripped
-% down version of Matlab's dare function (real-valued only, no balancing).
+% down" version of Matlab's dare function (real-valued only, no balancing).
 %
 % A,C,Q,R,S - general form state space parameters
 %
@@ -61,13 +61,13 @@ J = [eye(r) zeros(r,r+n); zeros(r) A zeros(r,n); zeros(n,r) -C zeros(n)];
 H = q(:,i+n)'*H(:,i);
 J = q(:,i+n)'*J(:,i);
 [JJ,HH,q,z] = qz(J(i,i),H(i,i),'real');
-[JJ,HH,~,z(i,:),qzflag] = ordqz(JJ,HH,q,z,'udo');
+[JJ,HH,~,z(i,:)] = ordqz(JJ,HH,q,z,'udo');
 L = ordeig(JJ,HH);
 
 % Check for stable invariant subspace
 
 sis = abs(L) > 1;
-if ~qzflag || any(~sis(j,:)) || any(sis(k,:))
+if any(~sis(j,:)) || any(sis(k,:))
 	rep = -1;
 	return % IMPORTANT: caller must test!!! (error is: ''DARE: eigenvalues on/near unit circle'')
 end
@@ -104,5 +104,5 @@ rep = norm(APA-UK+Q,1)/(1+norm(APA,1)+norm(UK,1)+norm(Q,1)); % relative residual
 % end
 
 if nargout > 3
-	L = L(r+1:rr); % Return stable eigenvalues
+	L = L(k); % Return stable eigenvalues
 end
