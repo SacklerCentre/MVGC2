@@ -88,7 +88,7 @@ for a = 1:g
 		y = x; y(i) = [];
 		r = [xi z];
 
-		[~,VR,rep] = var2riss(A,V,y,r);
+		[~,VR,rep] = vardare(A,V,y,r);
 		if sserror(rep,i) % check DARE report, bail out on error
 			sserr = true;
 			break;

@@ -3,16 +3,16 @@ function plot_gc(F,ptitle,cm,Fmax,plotm,psize)
 % plotm = n       - Matlab plot to figure n; if zero (default), use next Matlab figure
 % plotm = string  - Gnuplot terminal (may be empty)
 
-if nargin < 3 || isempty(cm)
+if nargin < 5 || isempty(plotm), return; end % do nothing
+if isempty(cm)
 	if ischar(plotm)
 		cm = 'defined ( 0 "#ffffff", 3 "#99bbcc", 10 "#000000" ) nops_allcF maxcolors 0'; % bone-like
 	else
 		cm = flipud(bone);
 	end
 end
-if nargin < 4 || isempty(Fmax),  Fmax  = 0; end
-if nargin < 5 || isempty(plotm), plotm = 0; end
-if nargin < 6, psize  = []; end
+if isempty(Fmax), Fmax  = 0; end
+if nargin < 6, psize = []; end
 
 if iscell(F)
 	assert(ismatrix(F),'GCs must be a cell matrix');

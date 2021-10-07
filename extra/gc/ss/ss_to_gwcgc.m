@@ -20,7 +20,7 @@ for b = 1:g
 	y = group{b};
     r = 1:n; r(y) = []; % omit group b
 
-    [~,VR,rep] = ss2iss(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
+    [~,VR,rep] = mdare(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
     if sserror(rep,b), continue; end % check DARE report, bail out on error
 
     for a = 1:g

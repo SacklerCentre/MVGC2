@@ -1,5 +1,7 @@
 function PBL = bandlimit(P,dim,fs,B)
 
+% Average P over frequency range specified in B.
+%
 % Assumption: P is defined from 0 - Nyqvist (inclusive) at regular spacing!
 
 if nargin < 2 || isempty(dim), dim = 1; end
@@ -27,7 +29,7 @@ else
         B(1) = 0;
         imin = 1;
     else
-        assert(B(1) >= 0 && B(1) <= fN,bmsg);
+        assert(B(1) >= 0 && B(1) < fN,bmsg);
         imin = 1+round(fac*B(1));
         if imin < 1, imin = 1; end
     end
@@ -35,7 +37,7 @@ else
         B(2) = fN;
         imax = N;
     else
-        assert(B(2) >= 0 && B(2) <= fN,bmsg);
+        assert(B(2) > 0 && B(2) <= fN,bmsg);
         imax = 1+round(fac*B(2));
         if imax > N, imax = N; end
     end

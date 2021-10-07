@@ -34,11 +34,10 @@ for b = 1:g
 	nr   = length(r);
 	pny  = p*ny;
 	pny1 = pny-ny;
-fprintf('\n\t\tF : group %d of %d : %2d sources ',b,g,ny);
 
 	% Solve the shrunken DARE
 
-	[KT,VR,rep] = var2riss(A,V,y,r);
+	[KT,VR,rep] = vardare(A,V,y,r);
     if sserror(rep,b), continue; end % check DARE report, bail out on error
 
 	% Calculate reduced SS parameters from shrunken DARE (note: VR is the same)
@@ -58,7 +57,6 @@ fprintf('\n\t\tF : group %d of %d : %2d sources ',b,g,ny);
     BR = ss2itrfun(AR,CR,KR,fres);
 
     for a = 1:g
-fprintf('.');
         if a == b, continue; end
         x = group{a};
         xr = findin(x,r);   % indices of group{a} in r

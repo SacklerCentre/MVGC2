@@ -91,7 +91,7 @@ FP = nan(nsamps,n,n);
 
 for j = 1:n
     fprintf('PWCGC from node %d...',j);
-    
+
     oj  = [1:j-1 j+1:n]; % omit j
 
     UPj = U;
@@ -106,14 +106,14 @@ for j = 1:n
 
         [A,SIG] = tsdata_to_var(UPj,p,regmode); % full regression
         if isbad(A), fprintf('\n\tERROR: VAR estimation failed'); continue; end % something went wrong
-        
+
         [A1,C,K,res] = var_to_ss(A,SIG,2);
         if res.error, fprintf(2,'\n\t%s',res.errmsg); continue; end
 
         KSIGSR = K*chol(SIG,'lower');
         LSIG = log(diag(SIG));
-        
-        [~,SIGR,rep] = ss2iss(A1,C(oj,:),KSIGSR*KSIGSR',SIG(oj,oj),K*SIG(:,oj)); % "reduced" innovations covariance
+
+        [~,SIGR,rep] = mdare(A1,C(oj,:),KSIGSR*KSIGSR',SIG(oj,oj),K*SIG(:,oj)); % "reduced" innovations covariance
         if rep < 0 % show-stopper!
             fprintf(2,'\n\tERROR in reduced model calculation for source node %d: ',j);
             switch rep
@@ -125,9 +125,9 @@ for j = 1:n
         if rep > sqrt(eps)
             fprintf(2,'\n\tWARNING in reduced model calculation for source node %d: DARE accuracy issues (relative residual = %e)\n',j,rep);
         end
-        
+
         FP(s,oj,j) = log(diag(SIGR))-LSIG(oj); % v2.0 - loop vectorised (thanks to A. Erramuzpe Aliaga)
-        
+
        %fprintf('\n');
     end
     fprintf('\n');

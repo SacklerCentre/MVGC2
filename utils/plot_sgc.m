@@ -3,10 +3,10 @@ function plot_sgc(P,lam,ptitle,logsx,plotm,psize,flines)
 % plotm = n       - Matlab plot to figure n (if empty or zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
 
-if nargin < 4 || isempty(logsx), logsx = false; end
-if nargin < 5 || isempty(plotm), plotm = 0; end
-if nargin < 6, psize  = []; end
-if nargin < 7, flines = []; end
+if nargin < 5 || isempty(plotm), return;         end % do nothing
+if nargin < 4 || isempty(logsx), logsx  = false; end
+if nargin < 6,                   psize  = [];    end
+if nargin < 7,                   flines = [];    end
 
 if iscell(P)
 	assert(isvector(P),'spectral quantities must be a (cell vector of) 3-dim matrix with the first two dims square');

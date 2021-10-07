@@ -19,7 +19,7 @@ F = NaN;
 
 KL = K*L;
 
-[~,VR,rep] = ss2iss(A,C(r,:),KL*KL',V(r,r),K*V(:,r)); % reduced model innovations covariance
+[~,VR,rep] = mdare(A,C(r,:),KL*KL',V(r,r),K*V(:,r)); % reduced model innovations covariance
 if sserror(rep), return; end % check DARE report, bail out on error
 
 F = logdet(VR(xr,xr)) - logdet(V(x,x));

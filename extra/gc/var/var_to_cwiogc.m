@@ -77,7 +77,7 @@ if gcin
 		x = i;
 		y = 1:n; y(x) = [];
 
-		[~,VR,rep] = var2riss(A,V,y,x);
+		[~,VR,rep] = vardare(A,V,y,x);
 		if sserror(rep), return; end % check DARE report, bail out on error
 
 		F(i) = log(VR) - log(V(x,x));
@@ -99,7 +99,7 @@ else
 		y = i;
 		x = 1:n; x(y) = [];
 
-		[~,VR,rep] = var2riss(A,V,y,x);
+		[~,VR,rep] = vardare(A,V,y,x);
 		if sserror(rep), return; end % check DARE report, bail out on error
 
 		F(i) = logdet(VR) - logdet(V(x,x));

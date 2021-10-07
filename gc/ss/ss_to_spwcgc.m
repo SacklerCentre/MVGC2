@@ -22,7 +22,7 @@ for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
 
     CR = C(r,:);
-    [KR,VR,rep] = ss2iss(A,CR,KVK,V(r,r),K*V(:,r));  % reduced model Kalman gain and innovations covariance
+    [KR,VR,rep] = mdare(A,CR,KVK,V(r,r),K*V(:,r)); % reduced model Kalman gain and innovations covariance
     if sserror(rep,y), continue; end % check DARE report, bail out on error
 
     BR = ss2itrfun(A,CR,KR,fres); % reduced inverse transfer function

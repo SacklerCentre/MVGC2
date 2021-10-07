@@ -22,7 +22,7 @@ KVK = KVL*KVL';
 for i = 1:nx
     r = [x(i) z];
 
-    [~,VR,rep] = ss2iss(A,C(r,:),KVK,V(r,r),K*V(:,r)); % reduced model innovations covariance
+    [~,VR,rep] = mdare(A,C(r,:),KVK,V(r,r),K*V(:,r)); % reduced model innovations covariance
     if sserror(rep,i), continue; end % check DARE report, bail out on error
 
     F = F + log(VR(1,1)) - log(V(x(i),x(i)));

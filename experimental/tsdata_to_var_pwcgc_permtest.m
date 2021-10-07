@@ -27,7 +27,7 @@ F = nan(n);
 LDV = log(diag(V));
 for y = 1:n
 	r = [1:y-1 y+1:n]; % omit y
-	[~,VR] = var2riss(A,V,y,r); % "reduced" innovations covariance
+	[~,VR] = vardare(A,V,y,r); % "reduced" innovations covariance
 	F(r,y) = log(diag(VR))-LDV(r);
 end
 
@@ -40,7 +40,7 @@ for y = 1:n
 		X0(y,:,:) = tsdata_permute(X(y,:,:),dclags); % randomly permute (rotate) source channel time series
 		[A,V] = tsdata_to_var(X,varmo,regmode);      % estimate VAR model
 		LDV = log(diag(V));
-		[~,VR] = var2riss(A,V,y,r);                  % "reduced" innovations covariance
+		[~,VR] = vardare(A,V,y,r);                   % "reduced" innovations covariance
 		F0(:,i) = log(diag(VR))-LDV(r);
 	end
 	pval(r,y) = mean(F(r,y) <= F0,2);                % p-value of F with respect to empirical permutation null distribution F0

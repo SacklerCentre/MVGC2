@@ -73,7 +73,7 @@ for b = 1:g
 	y = group{b};
     r = 1:n; r(y) = []; % omit group b
 
-	[~,VR,rep] = var2riss(A,V,y,r);
+	[~,VR,rep] = vardare(A,V,y,r);
     if sserror(rep,b), continue; end % check DARE report, bail out on error
 
 	if stats2

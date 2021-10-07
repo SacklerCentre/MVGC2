@@ -20,7 +20,7 @@ LDV = log(DV);
 F = nan(n);
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
-	[~,VR,rep] = var2riss(A,V,y,r);
+	[~,VR,rep] = vardare(A,V,y,r);
     if sserror(rep,y), continue; end % check DARE report, bail out on error
     F(r,y) = log(diag(VR))-LDV(r);
 end

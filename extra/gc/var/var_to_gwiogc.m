@@ -86,7 +86,7 @@ for a = 1:g
 		x = 1:n; x(y) = [];
 	end
 
-	[~,VR,rep] = var2riss(A,V,y,x);
+	[~,VR,rep] = vardare(A,V,y,x);
 	if sserror(rep), return; end % check DARE report, bail out on error
 
 	F(a) = logdet(VR) - logdet(V(x,x));

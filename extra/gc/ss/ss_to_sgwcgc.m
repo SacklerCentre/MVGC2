@@ -31,7 +31,7 @@ for b = 1:g
     r = 1:n; r(group{b}) = []; % omit group b
 
     CR = C(r,:);
-    [KR,VR,rep] = ss2iss(A,CR,KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
+    [KR,VR,rep] = mdare(A,CR,KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
     if sserror(rep,b), continue; end % check DARE report, bail out on error
 
     BR = ss2itrfun(A,CR,KR,fres);

@@ -21,12 +21,12 @@ assert(length(unique([x y])) == length([x y]),'x and y indices must be unique an
 assert(all(x >=1 & x <= n),'Some x indices out of range');
 assert(all(y >=1 & y <= n),'Some y indices out of range');
 
-z  = 1:n; z([x y]) = []; % indices of conditioning variables (i.e., all other variablesin model)
+z  = 1:n; z([x y]) = []; % indices of conditioning variables (i.e., all other variables in model)
 r = [x z];               % indices of variables in reduced model (omit source variables)
 
 xr = 1:length(x); % indices of target in reduced model
 
 F = NaN;
-[~,VR,rep] = var2riss(A,V,y,r);
+[~,VR,rep] = vardare(A,V,y,r);
 if sserror(rep), return; end % check DARE report, bail out on error
 F = logdet(VR(xr,xr)) - logdet(V(x,x));
