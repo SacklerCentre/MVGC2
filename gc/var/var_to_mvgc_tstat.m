@@ -33,7 +33,7 @@ r = [x z];               % indices of variables in reduced model (omit source va
 
 [~,VR]  = tsdata_to_var(X(r,:,:),p,regmode);  % reduced regression
 
-xr = 1:nx; % indices of target in reduced model
+xr = 1:length(x); % indices of target in reduced model
 
 if ftest
 	stat = trace(VR(xr,xr))/trace(V(x,x)) - 1;  % F-test statistic

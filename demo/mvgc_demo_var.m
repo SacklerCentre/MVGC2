@@ -69,8 +69,8 @@ assert(~infoo.error,'VAR error(s) found - bailing out');
 % Generate multi-trial VAR time series data with normally distributed residuals
 % for generated VAR coefficients and residuals covariance matrix.
 
-ptic('*** varfima_to_tsdata... ');
-X = varfima_to_tsdata(AA,[],[],VV,nobs,ntrials);
+ptic('*** var_to_tsdata... ');
+X = var_to_tsdata(AA,VV,nobs,ntrials);
 ptoc;
 
 %%%%%%%%%%%%%%%%%%%%%%%%% VAR modelling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
