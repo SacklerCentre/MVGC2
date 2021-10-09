@@ -85,13 +85,6 @@ if ~isempty(gvmat_path) % Initialise in-house "gvmat" GraphViz/Matlab library if
 end
 clear gvmat_path
 
-if ~isempty(flzc_path) % Initialise in-house LZ library
-	assert(exist(flzc_path,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_path);
-	run(fullfile(flzc_path,'startup'));
-	fprintf('[MVGC2 startup] Initialised "fLZc" Matlab Lempel-Ziv complexity API\n');
-end
-clear flzc_path
-
 % Check for mex files and set flags appropriately
 
 global have_mvfilter_mex;
