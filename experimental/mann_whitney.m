@@ -1,0 +1,25 @@
+function [z,U] = mann_whitney(x1,x2)
+
+% Mann-Whitney U test - a nonparametric unpaired "t-test" for
+% stochastic dominance. Positive effect means 2nd sample
+% stochastically dominates 1st sample.
+%
+% x1    first sample  (vector)
+% x2    second sample (vector)
+%
+% z     z-score (asymptotically standard normal)
+% U     the Mann-Whitney U-statistic
+
+% Calculate Mann-Whitney U-statistic
+
+w  = x2(:) > x1(:)';      % n1*n2 comparisons
+U  = nnz(w(:));           % count how many times x2 > x1 (ignore ties; this is floating-point!)
+
+% Calculate Mann-Whitney U theoretical null mean and variance under normal approximation
+
+n1 = length(x1);          % size of 1st sample
+n2 = length(x2);          % size of 2nd sample
+m = (n1*n2)/2;            % u theoretical mean under null
+v = (m*(n1+n2+1))/6;      % u theoretical variance under null
+s = sqrt(v);              % u theoretical standard deviation under null
+z = (U-m)/s;              % z-score ~ N(0,1)
