@@ -13,6 +13,21 @@ function [z,U] = mann_whitney_group(x1,x2)
 %
 % z     z-score (asymptotically standard normal)
 % U     the Mann-Whitney U-statistic
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% To calculate p-value(s) for a two-tailed significance test (this works also for
+% multiple hypothesis testing, in which case z may be a vector):
+%
+% pvals = erfc(abs(z)/sqrt(2));
+%
+% To calculate significances and critical z-score at significance level alpha
+% with multiple-hypothesis adjustment mhtc:
+%
+% [sigs,pcrit] = significance(pvals,alpha,mhtc);
+% zcrit = sqrt(2)*erfcinv(pcrit);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Calculate Mann-Whitney U-statistics for each group
 
@@ -31,7 +46,7 @@ for g = 1:N for each group
 	u(g) = nnz(w(:));         % count how many times x2 > x1 (ignore ties; this is floating-point!)
 end
 
-% Calculate Mann-Whitney U theoretical null means and variances under normal approximation
+% Calculate Mann-Whitney U theoretical null means, variances and z-score under normal approximation
 
 m = (n1.*n2)/2;               % u theoretical means under null
 v = (m.*(n1+n2+1))/6;         % u theoretical variances under null
@@ -39,4 +54,4 @@ M = sum(m);                   % U mean under null
 V = sum(v);                   % U variance under null (groups assumed independent!)
 S = sqrt(V);                  % U standard deviation under null
 U = sum(u);                   % U aggregated across groups (groups assumed independent!)
-z = (U-M)/S;                  % z-score ~ N(0,1)
+z = (U-M)/S;                  % z-score ~ N(0,1) under H0
