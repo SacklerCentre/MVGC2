@@ -1,6 +1,6 @@
-function [F,stats] = var_to_cwiogc(A,V,inout,whichstats,X,regmode)
+function [F,stats] = var_to_mviogc(A,V,inout,whichstats,X,regmode)
 
-% in/out GCs
+% in/out GCs per variable
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
