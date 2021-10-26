@@ -4,6 +4,10 @@ function stat = var_to_mvgc_tstat(X,V,x,y,p,regmode,tstat)
 %
 % NOTE: If full-regression residuals covariance matrix V is supplied, it must
 % have been obtained using 'tsdata_to_var' with the SAME 'p' and  'regmode' !!!
+%
+% See stats/mvgc_* for statistical inference. Parameters should be
+% nx = number of target variables, ny = number of source variables,
+% nz = total number of variables - (nx+ny).
 
 if strcmpi(tstat,'F')
 	ftest = true;
