@@ -38,18 +38,22 @@
 % algorithm [1,2] while the latter calculates the OLS solution to the
 % regression via QR decomposition.
 %
-% *_Note_*: If the regressions are rank-deficient or ill-conditioned then A may
-% be "bad" (i.e. will contain a |NaN| or |Inf|; see <isbad.html |isbad|>) and/or
-% warnings will may be issued. The caller should test for both these
-% possibilities. Possible causes are non-stationarity and/or colinearity in the
-% data.
+% *_Note_*: If the regressions are rank-deficient or ill-conditioned then |A| may
+% contain NaNs or Infs; this may be checked with the <isbad.html |isbad|>
+% function. Possible causes are non-stationarity and/or colinearity in the data.
 %
-% The caller should also, at the very least, check the _spectral radius_ of the
-% returned VAR coefficients (see <specnorm |specnorm|>) to ensure that the
-% coefficients define a stable VAR [1]. (This is calculated, along with other
-% relevant information, in the routine <var_to_autocov.html |var_to_autocov|>,
-% which will typically be called subsequent to this function, and may be tested
-% by a call to <var_info.html |var_info|>).
+% The OLS mode is actually valid for unstable VAR processes, in particular unit
+% root processes. The caller may check the _spectral radius_ of the returned VAR
+% coefficients (see <specnorm.html |specnorm|>) to test whether the coefficients
+% define a stable VAR [1]. (This is calculated, along with other relevant
+% information, by a call to <var_info.html |var_info|>).
+%
+% For the LWR mode, the spectral radius is guaranteed to be < 1; this is because
+% the algorithm _assumes_ stability. This implies that the result is invalid if
+% the generative process is unstable (e.g.,a unit root process).
+%
+% Many thanks to Gonzalo Camba-Mendez for pointing out an initialisation bug in
+% the original version (MVGC1) of the LWR code.
 %
 %% References
 %
@@ -66,7 +70,6 @@
 %
 % <specnorm.html |specnorm|> |
 % <var_to_autocov.html |var_to_autocov|> |
-% <isbad.html |isbad|> |
 % <var_info.html |var_info|>
 %
 % (C) Lionel Barnett and Anil K. Seth, 2012. See file license.txt in
@@ -84,112 +87,106 @@ if p == 0 % white noise!
 	M = N*m;
 	X0 = reshape(demean(X),n,M);
 	V = (X0*X0')/(M-1);
-	if nargout > 2, E = X; end % time series IS residuals!
+	if nargout > 2
+		E = X; % the residuals are just the time series itself!
+	end
 	return
 end
 
-p1 = p+1;
-pn = p*n;
-p1n = p1*n;
-
-A = NaN; % ensure a "bad" return value if anything goes wrong (see routine 'isbad')
-V = NaN;
-E = NaN;
-
-X = demean(X); % no constant term (don't normalise!)
+X = demean(X); % no constant term
 
 if  strcmpi(regmode,'OLS') % OLS (QR decomposition)
 
-    M = N*(m-p);
+	M = N*(m-p);  % effective number of observations
+	obs = p+1:m;  % the useable observations (i.e., lose the first p)
 
-    % stack lags
+	X0 = reshape(X(:,obs,:),n,M); % concatenate trials for unlagged observations
+	XL = zeros(n,p,M);
+	for k = 1:p % for each lags
+		XL(:,k,:) = reshape(X(:,obs-k,:),n,M); % concatenate trials for k-lagged observations
+	end
+	XL = reshape(XL,p*n,M); % stack lagged observations
 
-    X0 = reshape(X(:,p1:m,:),n,M); % concatenate trials for unlagged observations
-    XL = zeros(n,p,M);
-    for k = 1:p
-        XL(:,k,:) = reshape(X(:,p1-k:m-k,:),n,M); % concatenate trials for k-lagged observations
-    end
-    XL = reshape(XL,pn,M);         % stack lags
+	A = X0/XL; % OLS (via QR decomposition)
 
-    A = X0/XL;                     % OLS (via QR decomposition)
-    if isbad(A); return; end       % something went badly wrong
-
-    if nargout > 1
-        E = X0-A*XL;               % residuals
-        V = (E*E')/(M-1);          % residuals covariance matrix (unbiased estimator)
-        if nargout > 2             % align residuals per-trial with data (lose p lags)
+	if nargout > 1
+		E = X0-A*XL;        % residuals
+		V = (E*E')/(M-1);   % residuals covariance matrix (unbiased estimator)
+		if nargout > 2      % align residuals per-trial with data (lose p lags)
 			E = cat(2,nan(n,p,N),reshape(E,n,m-p,N));
 		end
-    end
+	end
 
-    A = reshape(A,n,n,p);          % so A(:,:,k) is the k-lag coefficients matrix
+	A = reshape(A,n,n,p); % so A(:,:,k) is the k-lag coefficients matrix
 
-elseif strcmpi(regmode,'LWR') % LWR (Morf)
+elseif strcmpi(regmode,'LWR') % LWR (Morf et al.)
 
-    I = eye(n);
+	I = eye(n);
 
-    % store lags
+	p1  = p+1;
+	p1n = p1*n;
 
-    XX = zeros(n,p1,m+p,N);
-    for k = 0:p
-        XX(:,k+1,k+1:k+m,:) = X; % k-lagged observations
-    end
+	% store lags
 
-    % initialise recursion - v2.0: Initialisation corrected (many thanks to Gonzalo Camba-Mendez for the heads-up)
+	XX = zeros(n,p1,m+p,N);
+	for k = 0:p
+		XX(:,k+1,k+1:k+m,:) = X; % k-lagged observations
+	end
 
-    EE = reshape(X,n,N*m);
+	% initialise recursion
+
+	EE = reshape(X,n,N*m);
 
 	[C,cholp] = chol(EE*EE','lower');
 	assert(cholp == 0,'Covariance matrix not positive-definite (is there colinearity in your data?)');
-    IC = inv(C); % inverse covariance square root
+	IC = inv(C); % inverse covariance square root
 
-    k  = 1;
-    kn = k*n;
-    M  = N*(m-k);
-    kk = 1:k;
-    kf = 1:kn;         % forward  indices
-    kb = p1n-kn+1:p1n; % backward indices
+	k  = 1;
+	kn = k*n;
+	M  = N*(m-k);
+	kk = 1:k;
+	kf = 1:kn;         % forward  indices
+	kb = p1n-kn+1:p1n; % backward indices
 
-    AF = zeros(n,p1n); AF(:,kf) = IC; % forward  AR coefficients
-    AB = zeros(n,p1n); AB(:,kb) = IC; % backward AR coefficients (reversed compared with [2])
+	AF = zeros(n,p1n); AF(:,kf) = IC; % forward  AR coefficients
+	AB = zeros(n,p1n); AB(:,kb) = IC; % backward AR coefficients (reversed compared with [2])
 
-    % LWR recursion
+	% LWR recursion
 
-    while k <= p
+	while k <= p
 
-        EF = AF(:,kf)*reshape(XX(:,kk,k+1:m,:),kn,M); % forward  prediction errors
-        EB = AB(:,kb)*reshape(XX(:,kk,k:m-1,:),kn,M); % backward prediction errors
+		EF = AF(:,kf)*reshape(XX(:,kk,k+1:m,:),kn,M); % forward  prediction errors
+		EB = AB(:,kb)*reshape(XX(:,kk,k:m-1,:),kn,M); % backward prediction errors
 
-        R = (chol(EF*EF','lower')\EF)*(chol(EB*EB','lower')\EB)'; % normalised reflection coefficients
+		R = (chol(EF*EF','lower')\EF)*(chol(EB*EB','lower')\EB)'; % normalised reflection coefficients
 
-        k  = k+1;
-        kn = k*n;
-        M  = N*(m-k);
+		k  = k+1;
+		kn = k*n;
+		M  = N*(m-k);
 		kk = 1:k;
-        kf = 1:kn;
-        kb = p1n-kn+1:p1n;
+		kf = 1:kn;         % forward  indices
+		kb = p1n-kn+1:p1n; % backward indices
 
-        AFPREV = AF(:,kf);
-        ABPREV = AB(:,kb);
+		AFPREV = AF(:,kf);
+		ABPREV = AB(:,kb);
 
-        AF(:,kf) = chol(I-R*R','lower')\(AFPREV-R*ABPREV);
-        AB(:,kb) = chol(I-R'*R,'lower')\(ABPREV-R'*AFPREV);
+		AF(:,kf) = chol(I-R*R','lower')\(AFPREV-R*ABPREV);
+		AB(:,kb) = chol(I-R'*R,'lower')\(ABPREV-R'*AFPREV);
 
-    end
+	end
 
 	A0 = AF(:,1:n);
-    A = reshape(-A0\AF(:,n+1:p1n),n,n,p);
-    if isbad(A); return; end % something went badly wrong
+	A = reshape(-A0\AF(:,n+1:p1n),n,n,p); % so A(:,:,k) is the k-lag coefficients matrix
 
-    if nargout > 1
+	if nargout > 1
 		M = N*(m-p);      % residuals lose p lags
 		E = A0\EF;        % residuals
-        V = (E*E')/(M-1); % residuals covariance matrix (unbiased estimator)
-        if nargout > 2    % align residuals per-trial with data (lose p lags)
+		V = (E*E')/(M-1); % residuals covariance matrix (unbiased estimator)
+		if nargout > 2    % align residuals per-trial with data (lose p lags)
 			E = cat(2,nan(n,p,N),reshape(E,n,m-p,N));
 		end
-    end
+	end
 
 else
-    error('bad regression mode ''%s''',regmode);
+	error('unknown regression mode ''%s''',regmode);
 end
