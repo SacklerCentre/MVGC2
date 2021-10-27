@@ -1,6 +1,6 @@
 function F = var_to_gwcggc(A,V,groups)
 
-% Groupwise-conditional global GCs
+% Groupwise-conditional GGCs
 %
 % Groups supplied as a cell vector of index vectors.
 %
