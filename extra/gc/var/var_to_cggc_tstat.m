@@ -1,4 +1,4 @@
-function stat = var_to_cggc_tstat(X,V,x,p,regmode)
+function stat = var_to_cggc_tstat(X,V,x,p,regmode,tstat)
 
 % Conditional GGC F-statistic
 %
@@ -15,6 +15,8 @@ function stat = var_to_cggc_tstat(X,V,x,p,regmode)
 %
 % See extra/ggc_* for statistical inference. Parameters should be
 % nx = size of x, nz = number of variables - size of x.
+
+assert(strcmpi(tstat,'F'),'Only F-test available for GGC');
 
 n = size(X,1);
 if isempty(V)

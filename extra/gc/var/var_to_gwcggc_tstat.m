@@ -1,4 +1,4 @@
-function stat = var_to_gwcggc_tstat(X,V,groups,p,regmode)
+function stat = var_to_gwcggc_tstat(X,V,groups,p,regmode,tstat)
 
 % Groupwise-conditional GGC F-statistics
 %
@@ -16,6 +16,8 @@ function stat = var_to_gwcggc_tstat(X,V,groups,p,regmode)
 %
 % See extra/ggc_* for statistical inference. Parameters should be
 % nx = size of group, nz = number of variables - size of group.
+
+assert(strcmpi(tstat,'F'),'Only F-test available for GGC');
 
 n = size(X,1);
 if isempty(V)
