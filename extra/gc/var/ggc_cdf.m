@@ -1,4 +1,4 @@
-function cdf = ggc_cdf(nx,nz,p,m,N)
+function cdf = ggc_cdf(tstat,nx,nz,p,m,N)
 
 % Return handle to CDF function for GGC F-statistic
 %
@@ -6,8 +6,10 @@ function cdf = ggc_cdf(nx,nz,p,m,N)
 % the least-squares model parameters in this case are not ML parameters,
 % and we don't know how to estimate those!
 
+assert(strcmpi(tstat,'F'),'Only F-test available for GGC');
+
 assert(m > p,'Insufficient observations for statistical test');
-M = N*(m-p) % effective number of observations
+M = N*(m-p); % effective number of observations
 n = nx+nz;
 pn = p*n;
 assert(M > pn,'Insufficient observations for F-test');

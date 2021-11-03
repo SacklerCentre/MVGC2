@@ -1,4 +1,4 @@
-function bias = ggc_bias(nx,nz,p,m,N)
+function bias = ggc_bias(tstat,nx,nz,p,m,N)
 
 % Return approximate bias (scaled null mean) of GGC F-statistic
 %
@@ -6,8 +6,10 @@ function bias = ggc_bias(nx,nz,p,m,N)
 % the least-squares model parameters in this case are not ML parameters,
 % and we don't know how to estimate those!
 
+assert(strcmpi(tstat,'F'),'Only F-test available for GGC');
+
 assert(m > p,'Insufficient observations for statistical test');
-M = N*(m-p) % effective number of observations
+M = N*(m-p); % effective number of observations
 n = nx+nz;
 pn = p*n;
 assert(M > pn,'Insufficient observations for F-test');

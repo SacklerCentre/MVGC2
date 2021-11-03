@@ -1,4 +1,4 @@
-function pval = ggc_pval(stat,nx,nz,p,m,N)
+function pval = ggc_pval(stat,tstat,nx,nz,p,m,N)
 
 % Return p-values for GGC F-statistic
 %
@@ -6,6 +6,8 @@ function pval = ggc_pval(stat,nx,nz,p,m,N)
 % the least-squares model parameters in this case are not ML parameters,
 % and we don't know how to estimate those!
 
-cdf = ggc_cdf(nx,nz,p,m,N); % function handle to CDF
+assert(strcmpi(tstat,'F'),'Only F-test available for GGC');
+
+cdf = ggc_cdf(tstat,nx,nz,p,m,N); % function handle to CDF
 
 pval = 1-cdf(stat);
