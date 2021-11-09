@@ -101,7 +101,7 @@ fP = nan(nsamps,n,n,h);
 
 for j = 1:n
     fprintf('spectral PWCGC from node %d...',j);
-    
+
     oj  = [1:j-1 j+1:n]; % omit j
 
     UPj = U;
@@ -116,14 +116,14 @@ for j = 1:n
 
         [A,SIG] = tsdata_to_var(UPj,p,regmode); % full regression
         if isbad(A), fprintf('\n\tERROR: VAR estimation failed'); continue; end % something went wrong
-        
+
         [A1,C,K,res] = var_to_ss(A,SIG,2);
         if res.error, fprintf(2,'\n\t%s',res.errmsg); continue; end
-        
+
         KSIGSR = K*chol(SIG,'lower');
 
         CR = C(oj,:);
-        [KR,SIGR,rep] = ss2iss(A1,CR,KSIGSR*KSIGSR',SIG(oj,oj),K*SIG(:,oj)); % "reduced" innovations covariance
+        [KR,SIGR,rep] = mdare(A1,CR,KSIGSR*KSIGSR',SIG(oj,oj),K*SIG(:,oj)); % "reduced" innovations covariance
         if rep < 0 % show-stopper!
             fprintf(2,'\n\tERROR in reduced model calculation for source node %d: ',j);
             switch rep
@@ -135,7 +135,7 @@ for j = 1:n
         if rep > sqrt(eps)
             fprintf(2,'\n\tWARNING in reduced model calculation for source node %d: DARE accuracy issues (relative residual = %e)\n',j,rep);
         end
-        
+
         H = ss2trfun(A1,C,K,fres);
 
         BR = ss2itrfun(A1,CR,KR,fres); % reduced inverse transfer function

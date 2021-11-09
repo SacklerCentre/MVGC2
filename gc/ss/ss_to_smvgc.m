@@ -38,7 +38,7 @@ else % conditional
 
     KL = K*L;
     CR = C(r,:);
-    [KR,VR,rep]  = ss2iss(A,CR,KL*KL',V(r,r),K*V(:,r)); % reduced model Kalman gain and innovations covariance
+    [KR,VR,rep]  = mdare(A,CR,KL*KL',V(r,r),K*V(:,r)); % reduced model Kalman gain and innovations covariance
     if sserror(rep), return; end % check DARE report, bail out on error
 
     BR    = ss2itrfun(A,CR,KR,fres);

@@ -1,11 +1,16 @@
 function info = ss_info(A,C,K,V,report)
 
-if nargin < 5 || isempty(report), report = 1; end % default: print out report
+if nargin < 5 || isempty(report), report = 1;      end % default: print out report
 
 [r, r1] = size(A); assert(r1 == r);
 [n, r1] = size(C); assert(r1 == r);
 [r1,n1] = size(K); assert(n1 == n && r1 == r);
-[n1,n2] = size(V); assert(n1 == n && n2 == n);
+if nargin < 4 || isempty(V)
+	V = eye(n);
+else
+	[n1,n2] = size(V); assert(n1 == n && n2 == n);
+end
+
 
 info.error = uint32(0);
 
@@ -16,7 +21,9 @@ info.rhoA = specnorm(A);
 
 info.rhoB = specnorm(A-K*C);
 
-info.acdec = ceil(0.5*log(eps)/log(max(info.rhoA,info.rhoB))); % so that autocov decays to < sqrt(eps), (probably ~ 1.5e-8)
+info.acdec = ceil(log(eps)/log(max(info.rhoA,info.rhoB))); % so that autocov decays to < eps
+
+info.fres = 2^nextpow2(info.acdec);
 
 if maxabs(triu(V,1)-triu(V',1)) > eps
     info.sigspd = 1; % not symmetric
@@ -86,7 +93,7 @@ if report == 1 % print out report
     else   fprintf('      uniform = %-.6f\n',info.mmii);
     end
 
-    fprintf('    autocorr. decay   = %-7d\n',info.acdec);
+    fprintf('    autocorr. decay   = %-12d  freq. res. = %d\n',info.acdec, info.fres);
 
     fprintf('\n');
 

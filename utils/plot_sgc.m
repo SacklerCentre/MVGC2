@@ -1,9 +1,12 @@
-function plot_sgc(P,lam,ptitle,plotm)
+function plot_sgc(P,lam,ptitle,logsx,plotm,psize,flines)
 
 % plotm = n       - Matlab plot to figure n (if empty or zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
 
-if nargin < 4 || isempty(plotm), plotm = 0; end
+if nargin < 5 || isempty(plotm), return;         end % do nothing
+if nargin < 4 || isempty(logsx), logsx  = false; end
+if nargin < 6,                   psize  = [];    end
+if nargin < 7,                   flines = [];    end
 
 if iscell(P)
 	assert(isvector(P),'spectral quantities must be a (cell vector of) 3-dim matrix with the first two dims square');
@@ -45,6 +48,8 @@ ylims = [min(Pm) 1.1*max(Px)];
 
 if ischar(plotm) % Gnuplot
 
+	if isempty(psize), psize = [Inf,1]; end
+
 	gpstem = fullfile(tempdir,'plot_sgc');
 
 	PP = cell(n*(n-1),1);
@@ -63,7 +68,7 @@ if ischar(plotm) % Gnuplot
 
 	gp_write(gpstem,PP);
 
-	gp = gp_open(gpstem,plotm,[Inf Inf]);
+	gp = gp_open(gpstem,plotm,psize);
 
 	fprintf(gp,'datfile = "%s.dat"\n\n',gpstem);
 
@@ -73,11 +78,23 @@ if ischar(plotm) % Gnuplot
 	fprintf(gp,'\nset xlab "frequency (Hz)"\n');
 	fprintf(gp,'set xr[%g:%g]\n',xlims(1),xlims(2));
 	fprintf(gp,'set yr[%g:%g]\n',ylims(1),ylims(2));
+	fprintf(gp,'set format y "%%.1f"\n');
+	fprintf(gp,'set size square\n');
+	if logsx
+		fprintf(gp,'set logs x\n');
+	end
 
 	if nargin > 2 && ~isempty(ptitle)
 		fprintf(gp,'\nset multiplot title "%s\\n\\n" layout %d,%d rowsfirst\n',ptitle,n,n);
 	else
 		fprintf(gp,'\nset multiplot layout %d,%d rowsfirst\n',n,n);
+	end
+
+	if ~isempty(flines)
+		fprintf(gp,'\n');
+		for i = 1:length(flines)
+			fprintf(gp,'set arrow from first %g,graph 0 to first %g,graph 1 nohead\n',flines(i),flines(i));
+		end
 	end
 
 	k = 0;
@@ -102,7 +119,7 @@ else
 	if plotm == 0, figure; else, figure(plotm); end; clf;
 
 	dco = get(0,'DefaultAxesColorOrder'); % save default colour order
-	set(0, 'DefaultAxesColorOrder',[0 0 0.8; 0.8 0 0; 0 0.8 0; dco]); % set to blue, red, green
+	set(0,'DefaultAxesColorOrder',[0 0 0.8; 0.8 0 0; 0 0.8 0; dco]); % set to blue, red, green
 
 	Pij = zeros(h,S);
 	k = 0;
@@ -120,6 +137,14 @@ else
 				ylim(ylims);
 				xlabel(xlab);
 				ylabel(sprintf('%d -> %d',j,i));
+				if logsx
+					set(gca,'xscale','log');
+				end
+				if ~isempty(flines)
+					for i = 1:length(flines)
+						xline(flines(i));
+					end
+				end
 			end
 		end
 	end

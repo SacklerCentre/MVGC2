@@ -1,8 +1,8 @@
-function [K,V,rep,L,P] = ss2iss(A,C,Q,R,S)
+function [K,V,rep,L,P] = mdare(A,C,Q,R,S)
 
 % Compute innovations form parameters for a state space model in general form by
-% solution of a discrete algebraic Riccati equation (DARE) (eqs. 7, 8a, 8b in
-% the reference article).
+% solution of a discrete algebraic Riccati equation (DARE). This is a "stripped
+% down" version of Matlab's dare function (real-valued only, no balancing).
 %
 % A,C,Q,R,S - general form state space parameters
 %
@@ -27,60 +27,60 @@ function [K,V,rep,L,P] = ss2iss(A,C,Q,R,S)
 [r, r1] = size(A); assert(r1 == r);
 [n, r1] = size(C); assert(r1 == r);
 [r1,r2] = size(Q); assert(r1 == r && r2 == r);
+if nargin < 4 || isempty(R)
+	R = eye(n);
+else
+	[n1,n2] = size(R); assert(n1 == n && n2 == n);
+end
 if nargin < 5 || isempty(S)
 	S = zeros(r,n);
 else
 	[r1,n1] = size(S); assert(r1 == r && n1 == n);
 end
-[n1,n2] = size(R); assert(n1 == n && n2 == n);
+
 rr = 2*r;
+i = 1:rr;
+j = 1:r;
+k = r+1:rr;
 
 K = [];
 V = [];
 P = [];
 
-% We solve the DARE using the Generalized Schur (QZ) decomposition method
-
-% Extended pencil
+% Solve the DARE using Generalized Schur (QZ) decomposition on the extended pencil:
 
 H = [A' zeros(r) C'; -Q  eye(r) -S; S' zeros(n,r) R];
 J = [eye(r) zeros(r,r+n); zeros(r) A zeros(r,n); zeros(n,r) -C zeros(n)];
 
-% NOTE - we don't balance!
+% QR decomposition - note: assumes real-valued, no balancing!
 
 [q,~] = qr(H(:,rr+1:rr+n));
-H = q(:,n+1:rr+n)'*H(:,1:rr);
-J = q(:,n+1:rr+n)'*J(:,1:rr);
 
 % QZ algorithm
 
-realHJ = isreal(H) && isreal(J);
-i = 1:rr;
-if realHJ
-    [JJ,HH,q,z] = qz(J(i,i),H(i,i),'real');
-else
-    [JJ,HH,q,z] = qz(J(i,i),H(i,i),'complex');
-end
-[JJ,HH,~,z(i,:),qzflag] = ordqz(JJ,HH,q,z,'udo');
+H = q(:,i+n)'*H(:,i);
+J = q(:,i+n)'*J(:,i);
+[JJ,HH,q,z] = qz(J(i,i),H(i,i),'real');
+[JJ,HH,~,z(i,:)] = ordqz(JJ,HH,q,z,'udo');
 L = ordeig(JJ,HH);
 
 % Check for stable invariant subspace
 
 sis = abs(L) > 1;
-if ~qzflag || any(~sis(1:r,:)) || any(sis(r+1:rr,:))
-    rep = -1;
-    return % IMPORTANT: caller must test!!! (error is: ''DARE: eigenvalues on/near unit circle'')
+if any(~sis(j,:)) || any(sis(k,:))
+	rep = -1;
+	return % IMPORTANT: caller must test!!! (error is: ''DARE: eigenvalues on/near unit circle'')
 end
 
-P1 = z(1:r,1:r);
-P2 = z(r+1:rr,1:r);
+P1 = z(j,j);
+P2 = z(k,j);
 
 % Solve P = P2/P1
 
 [LL,UU,pvec] = lu(P1,'vector');
 if rcond(UU) < eps
-    rep = -2;
-    return % IMPORTANT: caller must test!!! (error is: 'DARE: couldn''t find stabilising solution')
+	rep = -2;
+	return % IMPORTANT: caller must test!!! (error is: 'DARE: couldn''t find stabilising solution')
 end
 P(:,pvec) = (P2/UU)/LL;
 P = (P+P')/2;
@@ -104,12 +104,5 @@ rep = norm(APA-UK+Q,1)/(1+norm(APA,1)+norm(UK,1)+norm(Q,1)); % relative residual
 % end
 
 if nargout > 3
-
- % Return stable eigenvalues
-
-    if realHJ
-        L = L(r+1:rr);
-    else
-        L = conj(L(r+1:rr));
-    end
+	L = L(k); % Return stable eigenvalues
 end

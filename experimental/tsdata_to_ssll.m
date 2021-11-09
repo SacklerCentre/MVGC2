@@ -2,6 +2,9 @@ function [LL,Lk,Lm,sval,SVC,r] = tsdata_to_ssll(X,h,r,verb)
 
 % NOTE: returns *AVERAGE* log-likelihood
 
+h
+r
+
 [n,m,N] = size(X);
 
 assert(all(isint(h(:))),'past/future horizon must be a 2-vector or a scalar positive integer');
@@ -15,6 +18,8 @@ end
 assert(p+f < m,'past/future horizon too large (or not enough data)');
 rmax = n*min(p,f);
 
+rmax
+
 if nargin < 3 || isempty(r),    r      = rmax;  end
 if nargin < 4 || isempty(verb), verb   = false; end
 
@@ -25,7 +30,7 @@ X = demean(X); % no constant term (don't normalise!)
 LL  = nan(r,1); % log-likelihood
 Lk  = nan(r,1); % number free parameters
 Lm  = nan(r,1); % effective sample size
-SVC = nan(r,1); % esingular-value criterion
+SVC = nan(r,1); % singular-value criterion
 
 mp  = m-p;
 mp1 = mp+1;
@@ -60,8 +65,12 @@ assert(all(isfinite(BETA(:))),'subspace regression failed');
 
 [~,S,U] = svd(Wf\BETA*Wp); % SVD of CCA-weighted OH estimate
 
+size(S)
 sval = diag(S);    % the singular values
+size(sval)
+size([sval(2:end);0])
 Lk   = 2*n*(1:r)'; % number of free parameters (Hannan & Deistler, see also Bauer 2001) ... or r*r+2*n*r ???
+size(Lk)
 SVC  = -log(1-[sval(2:end);0]) + Lk*(log(Mh)/Mh); % Bauer's Singular Value Criterion
 Lm   =  M*ones(r,1);
 
@@ -85,7 +94,7 @@ for k = 1:r
 	E = XX - C*ZZ; % innovations
 	V = (E*E')/M;  % innovations covariance matrix (ML estimator)
 
-	LL(k) = -logdet(V)/2; % approximation to avergae log-likelihood
+	LL(k) = -logdet(V)/2; % approximation to average log-likelihood
 
 	if verb, fprintf('\n'); end
 

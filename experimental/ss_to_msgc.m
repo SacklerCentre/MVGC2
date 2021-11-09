@@ -22,7 +22,7 @@ L = chol(V,'lower');
 V = L*L';
 KL = K*L;
 CR = C(r,:);
-[KR,VR,rep] = ss2iss(A,CR,KL*KL',V(r,r),K*V(:,r));
+[KR,VR,rep] = mdare(A,CR,KL*KL',V(r,r),K*V(:,r));
 if sserror(rep), return; end
 LR = chol(VR,'lower');
 VR = LR*LR';

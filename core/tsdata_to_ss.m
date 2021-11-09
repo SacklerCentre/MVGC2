@@ -2,21 +2,21 @@ function [A,C,K,V,Z,E] = tsdata_to_ss(X,pf,r)
 
 % Estimate an (innovations form) state space model from an empirical observation
 % time series using Larimore's Canonical Correlations Analysis (CCA) state
-% space-subspace algorithm (W. E. Larimore, in Proc. Amer. Control Conference,
+% space-subspace algorithm (W. E. Larimore, Proc. Amer. Control Conference,
 % vol. 2, IEEE, 1983).
 %
 % X         - observation process time series
 % pf        - past/future horizons for canonical correlations
-% r         - SS model order: 'SVC' (default), 'prompt', or a positive integer
+% r         - SS model order (see 'tsdata_to_ssmo.m)
 %
 % A,C,K,V   - estimated innovations form state space parameters
 % Z         - estimated state process time series
 % E         - estimated innovations process time series
 %
 % The past/future horizons pf may be supplied as a 2-vector [p,f] or a scalar p
-% = f = pf. Bauer recommends setting p = f = 2*p, where p is the optimal
-% VAR model order for the observation process X according to Aikaike's Information
-% Criterion (AIC).
+% = f = pf. Bauer (D. Bauer, Automatic 37, 2001) recommends setting p = f = 2*p,
+% where p is the optimal VAR model order for the observation process X according
+% to Aikaike's Information Criterion (AIC).
 
 [n,m,N] = size(X);
 
@@ -28,6 +28,9 @@ elseif isvector(pf) && length(pf) == 2
 else
     error('past/future horizon must be a 2-vector or a scalar positive integer');
 end
+
+rmax = n*min(p,f);
+assert(isscalar(r) && isint(r) && r >= 0 && r <= rmax,'model order must be a positive integer <= n*min(p,f) = %d',rmax);
 
 A = NaN;
 C = NaN;

@@ -1,6 +1,6 @@
-function [F,stats] = var_to_cwiogc(A,V,inout,whichstats,X,regmode)
+function [F,stats] = var_to_mviogc(A,V,inout,whichstats,X,regmode)
 
-% in/out GCs
+% in/out GCs per variable
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
@@ -77,7 +77,7 @@ if gcin
 		x = i;
 		y = 1:n; y(x) = [];
 
-		[~,VR,rep] = var2riss(A,V,y,x);
+		[~,VR,rep] = vardare(A,V,y,x);
 		if sserror(rep), return; end % check DARE report, bail out on error
 
 		F(i) = log(VR) - log(V(x,x));
@@ -99,7 +99,7 @@ else
 		y = i;
 		x = 1:n; x(y) = [];
 
-		[~,VR,rep] = var2riss(A,V,y,x);
+		[~,VR,rep] = vardare(A,V,y,x);
 		if sserror(rep), return; end % check DARE report, bail out on error
 
 		F(i) = logdet(VR) - logdet(V(x,x));

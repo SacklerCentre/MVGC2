@@ -18,12 +18,16 @@ fprintf('[MVGC2 startup] Initialising MVGC2 toolbox\n');
 
 % Set configuration options: look first for config.m in this directory, else run default
 
-if exist('config.m','file') == 2
-	fprintf('[MVGC2 startup] Setting user configuration options\n');
-	config;
-else
+% if exist('config.m','file') == 2 is unreliable, as there might already be
+% a config.m on the PATH, which 'exist' will pick up!!! Thus we simply look
+% up the actual filename in root directory listing.
+
+if isempty(dir('config.m'))
 	fprintf('[MVGC2 startup] Setting default configuration options\n');
 	config_default;
+else
+	fprintf('[MVGC2 startup] Setting user configuration options\n');
+	config;
 end
 
 % Set paths
@@ -69,30 +73,17 @@ fprintf('[MVGC2 startup] Internal paths set\n');
 
 if ~isempty(gpmat_path) % Initialise in-house "gpmat" Gnuplot/Matlab library if present.
 	assert(exist(gpmat_path,'dir') == 7,'bad "gpmat" path: ''%s'' does not exist or is not a directory',gpmat_path);
-	cd(gpmat_path);
-	startup;
-	cd(mvgc2_root);
+	run(fullfile(gpmat_path,'startup'));
 	fprintf('[MVGC2 startup] Initialised "gpmat" Matlab Gnuplot API\n');
 end
 clear gpmat_path
 
 if ~isempty(gvmat_path) % Initialise in-house "gvmat" GraphViz/Matlab library if present.
 	assert(exist(gvmat_path,'dir') == 7,'bad "gvmat" path: ''%s'' does not exist or is not a directory',gvmat_path);
-	cd(gvmat_path);
-	startup;
-	cd(mvgc2_root);
+	run(fullfile(gvmat_path,'startup'));
 	fprintf('[MVGC2 startup] Initialised "gvmat" Matlab GraphViz API\n');
 end
 clear gvmat_path
-
-if ~isempty(flzc_path) % Initialise in-house LZ library
-	assert(exist(flzc_path,'dir') == 7,'bad "fLZc" path: ''%s'' does not exist or is not a directory',flzc_path);
-	cd(flzc_path);
-	startup;
-	cd(mvgc2_root);
-	fprintf('[MVGC2 startup] Initialised "fLZc" Matlab Lempel-Ziv complexity API\n');
-end
-clear flzc_path
 
 % Check for mex files and set flags appropriately
 
@@ -113,6 +104,17 @@ if have_findin_mex
     fprintf('[MVGC2 startup] ''findin'' mex routine available for your platform\n');
 else
 	fprintf(2,'[MVGC2 startup] WARNING: no ''findin'' mex file found; please run ''make'' from\n');
+	fprintf(2,'[MVGC2 startup]          the command line in the C subfolder, then ''mextest''\n');
+	fprintf(2,'[MVGC2 startup]          from the Matlab prompt. Meanwhile, a slower scripted\n');
+	fprintf(2,'[MVGC2 startup]          routine will be used.\n');
+end
+
+global have_slidare_mex;
+have_slidare_mex = exist('slidare_mex','file') == 3;
+if have_slidare_mex
+    fprintf('[MVGC2 startup] ''slidare'' mex routine available for your platform\n');
+else
+	fprintf(2,'[MVGC2 startup] WARNING: no ''slidare'' mex file found; please run ''make'' from\n');
 	fprintf(2,'[MVGC2 startup]          the command line in the C subfolder, then ''mextest''\n');
 	fprintf(2,'[MVGC2 startup]          from the Matlab prompt. Meanwhile, a slower scripted\n');
 	fprintf(2,'[MVGC2 startup]          routine will be used.\n');

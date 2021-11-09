@@ -22,7 +22,6 @@ for a = 1:g
 	ny = nx-1;
 	nz = length(z);
 	nr = nz+1;
-fprintf('\n\t\tG : group %d of %d : %2d sources ',a,g,nx);
 
 	pny  = p*ny;
 	pny1 = pny-ny;
@@ -30,12 +29,11 @@ fprintf('\n\t\tG : group %d of %d : %2d sources ',a,g,nx);
 	fa = zeros(1,h);
 	sserr = false;
 	for i = 1:nx
-fprintf('.');
 		xi = x(i);
 		y = x; y(i) = [];
 		r = [xi z];
 
-		[KT,VR,rep] = var2riss(A,V,y,r);
+		[KT,VR,rep] = vardare(A,V,y,r);
 		if sserror(rep,i) % check DARE report, bail out on error
 			sserr = true;
 			break;

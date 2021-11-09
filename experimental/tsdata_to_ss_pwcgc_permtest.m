@@ -27,7 +27,7 @@ F = nan(n);
 L = chol(V,'lower'); KL  = K*L; KVK = KL*KL'; LDV = log(diag(V));
 for y = 1:n
     r = [1:y-1 y+1:n]; % omit y
-    [~,VR] = ss2iss(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
+    [~,VR] = mdare(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
     F(r,y) = log(diag(VR))-LDV(r);
 end
 
@@ -41,7 +41,7 @@ for y = 1:n
 		[A,C,K,V]  = tsdata_to_ss(X0,sspf,ssmo);       % estimate permutation null SS model
 		L = chol(V,'lower'); KL  = K*L; KVK = KL*KL';
 		LDV = log(diag(V));
-		[~,VR] = ss2iss(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
+		[~,VR] = mdare(A,C(r,:),KVK,V(r,r),K*V(:,r)); % "reduced" innovations covariance
 		F0(:,i) = log(diag(VR))-LDV(r);
 	end
 	pval(r,y) = mean(F(r,y) <= F0,2);                  % p-value of F with respect to empirical permutation null distribution F0

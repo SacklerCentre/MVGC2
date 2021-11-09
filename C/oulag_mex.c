@@ -1,12 +1,11 @@
+// Use Makefile in this directory to build .mex
+
 #include <string.h> // for memcpy
 #include "mex.h"
 
 /**************************************************************************
  * WARNING: NO ERROR CHECKING WHATSOEVER - CALL IT RIGHT!!! (see oulag.m) *
  **************************************************************************
- *
- *     X = oulag_c(Z,b,A,r);
- *
  */
 
 #define UNUSED __attribute__ ((unused))

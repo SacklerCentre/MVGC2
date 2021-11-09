@@ -22,7 +22,7 @@ varmomax  = 32;     % maximum model order for VAR model order selection
 
 % SS model order estimation
 
-ssmosel   = 'SVC';  % SS model order selection ('ACT', 'SVC', 'AIC', 'BIC', 'HQC', 'LRT', or supplied numerical value)
+ssmosel   = 'SVC';  % SS model order selection ('ACT', 'SVC', or supplied numerical value)
 
 % MVGC (frequency domain)
 
@@ -31,7 +31,6 @@ fres      = [];     % spectral MVGC frequency resolution (empty for automatic ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ~exist('seed',   'var'), seed     = 0;    end % random seed (0 for unseeded)
-if ~exist('svconly','var'), svconly  = true; end % only compute SVC for SS model order selection (faster)
 if ~exist('plotm',  'var'), plotm    = 0;    end % plot mode (figure number offset, or Gnuplot terminal string)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,30 +89,14 @@ if varmo >= varmomax, fprintf(2,'*** WARNING: selected VAR maximum model order (
 
 pf = 2*varmo; % Bauer recommends 2 x VAR model order
 
-if svconly  % SVC only: computationally much faster
+ptic('\n*** tsdata_to_ssmo... ');
+if isnumeric(plotm), plotm = plotm+1; end
+[ssmosvc,ssmomax] = tsdata_to_ssmo(X,pf,plotm);
+ptoc;
 
-	ptic('\n*** tsdata_to_sssvc... ');
-	if isnumeric(plotm), plotm = plotm+1; end
-	[ssmosvc,ssmomax] = tsdata_to_sssvc(X,pf,[],plotm);
-	ptoc;
+% Select and report SS model order.
 
-	% Select and report SS model order.
-
-	ssmo = moselect(sprintf('SS model order selection (max = %d)',ssmomax),ssmosel,'ACT',ssmoact,'SVC',ssmosvc);
-
-
-else        % SVC + likelihood-based selection criteria + SVC: computational intensive
-
-	ptic('\n*** tsdata_to_ssmo... ');
-	if isnumeric(plotm), plotm = plotm+1; end
-	[ssmoaic,ssmobic,ssmohqc,ssmosvc,ssmolrt,ssmomax] = tsdata_to_ssmo(X,pf,[],[],plotm);
-	ptoc;
-
-	% Select and report SS model order.
-
-	ssmo = moselect(sprintf('SS model order selection (max = %d)',ssmomax),ssmosel,'ACT',ssmoact,'AIC',ssmoaic,'BIC',ssmobic,'HQC',ssmohqc,'SVC',ssmosvc,'LRT',ssmolrt);
-
-end
+ssmo = moselect(sprintf('SS model order selection (max = %d)',ssmomax),ssmosel,'ACT',ssmoact,'SVC',ssmosvc);
 
 assert(ssmo > 0,'selected zero model order! GCs will all be zero!');
 if ssmo >= ssmomax, fprintf(2,'*** WARNING: selected SS maximum model order (may have been set too low)\n'); end
@@ -155,14 +138,22 @@ plot_gc({FF,F},{'PWCGC (actual)','PWCGC (estimated)'},[],[maxF maxF],plotm);
 
 %% Granger causality estimation: frequency domain
 
+% Calculate spectral pairwise-conditional causalities resolution from SS model
+% parameters. If not specified, we set the frequency resolution to something
+% sensible. Warn if resolution is very large, as this may cause problems.
+
 if isempty(fres)
-    fres = 2^nextpow2(max(info.acdec,infoo.acdec)); % alternatively, fres = 2^nextpow2(nobs);
-	fprintf('\nUsing frequency resolution %d\n',fres);
+	maxfres = 2^14; % adjust to taste
+	fres = max(info.fres,infoo.fres);
+	if fres > maxfres
+		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
+		fres = maxfres;
+	else
+		fprintf('\nUsing frequency resolution %d',fres);
+	end
 end
-if fres > 10000 % adjust to taste
-	fprintf(2,'\nWARNING: large frequency resolution = %d - may cause computation time/memory usage problems\nAre you sure you wish to continue [y/n]? ',fres);
-	istr = input(' ','s'); if isempty(istr) || ~strcmpi(istr,'y'); fprintf(2,'Aborting...\n'); return; end
-end
+fabserr = ss_check_fres(A,C,K,V,fres);
+fprintf(' (absolute integration error = %e)\n',fabserr);
 
 ptic(sprintf('\n*** ss_to_spwcgc (at frequency resolution = %d)... ',fres));
 f = ss_to_spwcgc(A,C,K,V,fres);
@@ -183,7 +174,7 @@ freqs = sfreqs(fres,fs);
 % Plot spectral causal graphs.
 
 if isnumeric(plotm), plotm = plotm+1; end
-plot_sgc({ff,f},freqs,'Spectral Granger causalities (blue = actual, red = estimated)',plotm);
+plot_sgc({ff,f},freqs,'Spectral Granger causalities (blue = actual, red = estimated)',[],plotm);
 
 % Granger causality calculation: frequency domain -> time-domain
 

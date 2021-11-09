@@ -15,4 +15,4 @@ end
 Ak1KV = Ak*K*V; % Ak = A^(k-1)
 Ak = A*Ak;      % Ak = A^k
 
-[Kk,Vk,rep] = ss2iss(Ak,C,U*U',V,Ak1KV); % convert downsampled SS parms to ISS parms
+[Kk,Vk,rep] = mdare(Ak,C,U*U',V,Ak1KV); % convert downsampled SS parms to ISS parms

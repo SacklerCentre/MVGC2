@@ -1,3 +1,5 @@
+// Use Makefile in this directory to build .mex
+
 #include <string.h> // for memcpy
 #include "mex.h"
 #include "matrix.h"

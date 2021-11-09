@@ -38,7 +38,7 @@ Vms = ISS2MSE_ms(A,C,K,V,q);      % full multi-step prediction error covariances
 AR = A;
 CR = C(r,:);
 KVL = K*chol(V,'lower');
-[KR,VR,rep] = ss2iss(AR,CR,KVL*KVL',V(r,r),K*V(:,r));
+[KR,VR,rep] = mdare(AR,CR,KVL*KVL',V(r,r),K*V(:,r));
 if sserror(rep), return; end    % check DARE report, bail out on error
 
 VRms = ISS2MSE_ms(AR,CR,KR,VR,q); % reduced multi-step prediction error covariances

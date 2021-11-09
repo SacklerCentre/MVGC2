@@ -4,8 +4,11 @@ if nargin < 3 || isempty(report), report = 1; end % default: print out report
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
-[n1,n2]  = size(V);
-assert(n1 == n && n2 == n,'Residuals covariance matrix must be square and match VAR coefficients matrix');
+if nargin < 2 || isempty(V)
+	V = eye(n);
+else
+	[n1,n2] = size(V); assert(n1 == n && n2 == n);
+end
 pn1 = (p-1)*n;
 
 info.error = uint32(0);
@@ -17,7 +20,9 @@ info.morder = p;
 
 info.rho = max(abs(eig([reshape(A,n,p*n); eye(pn1) zeros(pn1,n)],'nobalance'))); % v2.0 - don't balance!
 
-info.acdec = ceil(0.5*log(eps)/log(info.rho)); % so that autocov decays to < sqrt(eps), (probably ~ 1.5e-8)
+info.acdec = ceil(log(eps)/log(info.rho)); % so that autocov decays to < machine precision
+
+info.fres = 2^nextpow2(info.acdec);
 
 if maxabs(triu(V,1)-triu(V',1)) > eps
     info.sigspd = 1; % not symmetric
@@ -62,7 +67,7 @@ if report == 1 % print out report
     fprintf('    AR spectral norm  = %.4f',info.rho);
     if      bitget(info.error,1), fprintf(2,'    ERROR: unstable (explosive)\n');
     elseif  bitget(info.error,2), fprintf(2,'    ERROR: unstable (unit root)\n');
-    else    fprintf('      stable (autocorrelation decay ~ %d)\n',info.acdec);
+    else    fprintf('      stable (autocorr. decay = %d, freq. res. = %d)\n',info.acdec,info.fres);
     end
 
     fprintf('    residuals covariance matrix');

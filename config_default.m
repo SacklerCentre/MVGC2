@@ -27,8 +27,6 @@ if ~exist('include_maintainer',   'var'), include_maintainer   = false; end
 %
 % if ~exist('gpmat_path',  'var'), gpmat_path = getenv('GPMAT_PATH'); end
 % if ~exist('gvmat_path',  'var'), gvmat_path = getenv('GVMAT_PATH'); end
-% if ~exist('flzc_path',   'var'), flzc_path  = getenv('FLZC_PATH');  end
 
 if ~exist('gpmat_path', 'var'), gpmat_path = ''; end
 if ~exist('gvmat_path', 'var'), gvmat_path = ''; end
-if ~exist('flzc_path',  'var'), flzc_path  = ''; end

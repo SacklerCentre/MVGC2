@@ -27,7 +27,7 @@ for y = 1:n
 
 	% Solve the shrunken DARE
 
-	[KT,VR,rep] = var2riss(A,V,y,r);
+	[KT,VR,rep] = vardare(A,V,y,r);
     if sserror(rep,y), continue; end % check DARE report, bail out on error
 
 	% Calculate reduced SS parameters from shrunken DARE (note: VR is the same)

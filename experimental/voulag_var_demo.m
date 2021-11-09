@@ -33,4 +33,4 @@ f = sfreqs(fres,fs);
 gp_qplot(f,S,[],'set logs xy');
 
 F = var_to_spwcgc(A,V,fres);
-plot_sgc(F,f,[],'x11');
+plot_sgc(F,f,[],[],'x11');
