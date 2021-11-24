@@ -27,8 +27,7 @@ function [z,U] = mann_whitney(x1,x2)
 
 % Calculate Mann-Whitney U-statistic
 
-w  = x2(:) > x1(:)';      % n1*n2 comparisons
-U  = nnz(w(:));           % count how many times x2 > x1 (ignore ties; this is floating-point!)
+U = nnz(x2(:) > x1(:)');  % n1*n2 comparisons: count how many times x2 > x1 (ignore ties; this is floating-point!)
 
 % Calculate Mann-Whitney U theoretical null mean, variance and z-score under normal approximation
 

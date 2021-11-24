@@ -40,10 +40,9 @@ u  = zeros(N,1);
 n1 = zeros(N,1);
 n2 = zeros(N,1);
 for g = 1:N % for each group
-	n1(g) = numel(x1{g});     % size of 1st group
-	n2(g) = numel(x2{g});     % size of 2nd group
-	w = x2{g}(:) > x1{g}(:)'; % n1{g}*n2{g} comparisons
-	u(g) = nnz(w(:));         % count how many times x2 > x1 (ignore ties; this is floating-point!)
+	n1(g) = numel(x1{g});              % size of 1st group
+	n2(g) = numel(x2{g});              % size of 2nd group
+	u(g)  = nnz(x2{g}(:) > x1{g}(:)'); % n1{g}*n2{g} comparisons: count how many times x2 > x1 (ignore ties; this is floating-point!)
 end
 
 % Calculate Mann-Whitney U theoretical null means, variances and z-score under normal approximation
