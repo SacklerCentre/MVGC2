@@ -1,8 +1,8 @@
 function [z,U] = mann_whitney_group(x1,x2)
 
-% "Groupwise" Mann-Whitney U test - a nonparametric unpaired "t-test"
-% for stochastic dominance between paired groups of samples; that is,
-% comparison is only between samples belonging to the same group.
+% "Groupwise" Mann-Whitney U test - a nonparametric unpaired "t-test" for
+% stochastic dominance between independent paired groups of samples; that
+% is, comparisons are only between samples belonging to the same group-pair.
 % Positive effect means 2nd group stochastically dominates 1st group.
 %
 % Typical usage is for a cross-subject analysis, where each "group" corresponds
@@ -21,19 +21,17 @@ function [z,U] = mann_whitney_group(x1,x2)
 %
 % pvals = erfc(abs(z)/sqrt(2));
 %
-% To calculate significances and critical z-score at significance level alpha
-% with multiple-hypothesis adjustment mhtc:
+% To calculate significances and critical z-score (two-tailed test) at significance
+% level alpha with multiple-hypothesis adjustment mhtc:
 %
 % [sigs,pcrit] = significance(pvals,alpha,mhtc);
 % zcrit = sqrt(2)*erfcinv(pcrit);
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Calculate Mann-Whitney U-statistics for each group
+assert(iscell(x1) && iscell(x2) && isvector(x1) && isvector(x2) && length(x1) == length(x2),'Paired-group data must be matching cell vectors of samples');
 
-assert(iscell(x1) && iscell(x2) && isvector(x1) && isvector(x2) && length(x1) == length(x2),'Data must be matching cell vectors');
-
-% Mann-Whitney U test statistics
+% Calculate Mann-Whitney U for each group
 
 N  = length(x1); % number of groups
 u  = zeros(N,1);
@@ -45,12 +43,12 @@ for g = 1:N % for each group
 	u(g)  = nnz(x2{g}(:) > x1{g}(:)'); % n1{g}*n2{g} comparisons: count how many times x2 > x1 (ignore ties; this is floating-point!)
 end
 
-% Calculate Mann-Whitney U theoretical null means, variances and z-score under normal approximation
+% Aggregate Mann-Whitney U across groups (groups assumed independent!)
 
-m = (n1.*n2)/2;               % u theoretical means under null
-v = (m.*(n1+n2+1))/6;         % u theoretical variances under null
-M = sum(m);                   % U mean under null
-V = sum(v);                   % U variance under null (groups assumed independent!)
-S = sqrt(V);                  % U standard deviation under null
-U = sum(u);                   % U aggregated across groups (groups assumed independent!)
-z = (U-M)/S;                  % z-score ~ N(0,1) under H0
+U = sum(u);
+
+% Calculate Mann-Whitney aggregated U asymptotic null mean, variance and z-score
+
+m = sum((n1.*n2)/2);       % aggregated U asymptotic mean under null
+v = sum((m.*(n1+n2+1))/6); % aggregated U asymptotic variance under null
+z = (U-m)/sqrt(v);         % z-score ~ N(0,1) under H0
