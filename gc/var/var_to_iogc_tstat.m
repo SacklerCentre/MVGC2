@@ -1,4 +1,4 @@
-function stat = var_to_mviogc_tstat(X,V,inout,p,regmode,tstat)
+function stat = var_to_iogc_tstat(X,V,inout,p,regmode,tstat)
 
 % In/out GC test statistics per variable
 %

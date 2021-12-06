@@ -1,6 +1,11 @@
 function f = var_to_sgwiogc(A,V,group,inout,fres)
 
-% in/out group spectral GCs
+% In/out group spectralGCs
+%
+% Groups supplied as a cell vector of index vectors.
+%
+% For each group, GC is calculated either to or from the group and
+% the rest of the system.
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
@@ -9,10 +14,12 @@ assert(n1 == n && n2 == n,'Residuals covariance matrix must be square, and match
 
 g = check_group(group,n);
 
-switch lower(inout)
-	case 'in',  gcin = true;
-	case 'out', gcin = false;
-	otherwise, error('in/out parameter must be ''in'' or ''out''');
+if strcmpi(inout,'in')
+	gcin = true;
+elseif strcmpi(inout,'out')
+	gcin = false;
+else
+	error('in/out parameter must be ''in'' or ''out''');
 end
 
 h = fres+1;
@@ -29,9 +36,7 @@ for a = 1:g
 		y = group{a};
 		x = 1:n; x(y) = [];
 	end
-
 	PVL = chol(parcov(V,y,x),'lower');
-
     for k = 1:h
         HVL  = H(x,:,k)*VL;
         SR   = HVL*HVL';

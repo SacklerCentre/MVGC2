@@ -1,4 +1,4 @@
-function F = ss_to_cwiogc(A,C,K,V,inout)
+function F = ss_to_iogc(A,C,K,V,inout)
 
 % in/out group GCs
 

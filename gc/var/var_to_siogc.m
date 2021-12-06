@@ -1,6 +1,9 @@
-function f = var_to_scwiogc(A,V,inout,fres)
+function f = var_to_siogc(A,V,inout,fres)
 
-% in/out group spectral GCs
+% In/out spectral GCs per variable
+%
+% For each variable, GC is calculated either to or from the variable
+% and the rest of the system.
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
@@ -20,12 +23,9 @@ H   = var2trfun(A,fres);
 VL  = chol(V,'lower');
 
 if gcin
-	for i = 1:n
-		x = i;
+	for x = 1:n
 		y = 1:n; y(x) = [];
-
 		PVL = chol(parcov(V,y,x),'lower');
-
 		for k = 1:h
 			HVL  = H(x,:,k)*VL;
 			SR   = HVL*HVL';
@@ -34,12 +34,9 @@ if gcin
 		end
 	end
 else
-	for i = 1:n
-		y = i;
+	for y = 1:n
 		x = 1:n; x(y) = [];
-
 		PVL = chol(parcov(V,y,x),'lower');
-
 		for k = 1:h
 			HVL  = H(x,:,k)*VL;
 			SR   = HVL*HVL';

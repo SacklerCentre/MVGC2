@@ -1,4 +1,4 @@
-function F = var_to_mviogc(A,V,inout)
+function F = var_to_iogc(A,V,inout)
 
 % In/out GCs per variable
 %
