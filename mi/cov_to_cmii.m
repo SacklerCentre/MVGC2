@@ -20,7 +20,7 @@ nx = length(x);
 LDV  = logdet(V);
 ox = 1:n; ox(x) = [];
 I = -LDV - (nx-1)*logdet(V(ox,ox));
-for i = groups{a}
-	iox = [i ox];
+for i = 1:nx
+	iox = [x(i) ox];
 	I = I + logdet(V(iox,iox));
 end

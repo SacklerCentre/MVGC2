@@ -37,7 +37,7 @@ end
 addpath(mvgc2_root);
 addpath(fullfile(mvgc2_root,'core'));
 addpath(genpath(fullfile(mvgc2_root,'gc')));
-addpath(genpath(fullfile(mvgc2_root,'cc')));
+addpath(genpath(fullfile(mvgc2_root,'mi')));
 addpath(fullfile(mvgc2_root,'stats'));
 addpath(fullfile(mvgc2_root,'utils'));
 addpath(fullfile(mvgc2_root,'demo'));
