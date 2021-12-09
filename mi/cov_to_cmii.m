@@ -13,6 +13,10 @@ function I = cov_to_cmii(V,x)
 [n,n1] = size(V);
 assert(n1 == n,'Covariance matrix must be square');
 
+if nargin < 2 || isempty(x)
+	x = 1:n; % all variables
+end
+
 x = x(:)'; % vectorise multivariable indices
 assert(all(x >=1 & x <= n),'Some x indices out of range');
 nx = length(x);
