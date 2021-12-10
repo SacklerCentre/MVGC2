@@ -34,8 +34,6 @@ if ~exist('rho',    'var'), rho     = [0.9,0.95];  end % spectral radii
 if ~exist('wvar',   'var'), wvar    = [0.9,0.7];   end % var coefficients decay weighting factors
 if ~exist('rmi',    'var'), rmi     = [0.8,1.2];   end % residuals log-generalised correlations (multi-information):
 if ~exist('regm',   'var'), regm    = 'OLS';       end % VAR model estimation regression mode ('OLS' or 'LWR')
-if ~exist('tstat',  'var'), tstat   = 'LR';        end % GC test statistic: F or LR (likelihood ratio)
-if ~exist('debias', 'var'), debias  = true;        end % Debias GC statistics? (recommended for inference)
 if ~exist('alpha',  'var'), alpha   = 0.05;        end % Significance level
 if ~exist('S',      'var'), S       = [1100,900];  end % bootdstrap sample sizes
 if ~exist('hbins',  'var'), hbins   = 50;          end % histogram bins
@@ -165,3 +163,5 @@ function [Fb,et] = mvgc_var_multitrial_bootstrap(X,x,y,p,S,regm)
 	et = toc; % elapsed time
 
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%############%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
