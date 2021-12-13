@@ -20,7 +20,7 @@ I = nan(n);
 for i = 1:n
 	for j = i+1:n
 		ij = [i j];
-		I(i,j) = LDV(i) + LDV(j) - log(det(V(ij,ij)));
+		I(i,j) = LDV(i) + LDV(j) - logdet(V(ij,ij));
         I(j,i) = I(i,j);
 	end
 end
