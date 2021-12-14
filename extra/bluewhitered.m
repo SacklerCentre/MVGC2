@@ -38,7 +38,7 @@ bwr = [blu;flipud(red)];
 
 % For testing
 
-if nargin > 3 || ~isempty(fignum)
+if nargin > 3 && ~isempty(fignum)
 	figure(fignum);
 	clf;
 	x = linspace(0,1,500)';
