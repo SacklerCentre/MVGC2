@@ -21,10 +21,10 @@ x = x(:)'; % vectorise multivariable indices
 assert(all(x >=1 & x <= n),'Some x indices out of range');
 nx = length(x);
 
-LDV  = logdet(V);
+LDVOI = zeros(n,1);
 ox = 1:n; ox(x) = [];
-I = -LDV - (nx-1)*logdet(V(ox,ox));
-for i = 1:nx
-	iox = [x(i) ox];
-	I = I + logdet(V(iox,iox));
+for i = x
+	iox = [i ox];
+	LDVOI(i) = logdet(V(iox,iox));
 end
+I = sum(LDVOI) - logdet(V) - (nx-1)*logdet(V(ox,ox));

@@ -16,20 +16,18 @@ function I = cov_to_pwcmi(V)
 [n,n1] = size(V);
 assert(n1 == n,'Covariance matrix must be square');
 
-LDV = logdet(V);
-
 LDVI = zeros(n,1);
 for i = 1:n
     oi = 1:n; oi(i) = []; % omit i-th
     LDVI(i) = logdet(V(oi,oi));
 end
 
-I = nan(n);
-
+LDVIJ = nan(n);
 for i = 1:n
 	for j = i+1:n
         oij = 1:n; oij([i j]) = []; % omit i-th and j-th
-        I(i,j) = LDVI(i) + LDVI(j) - logdet(V(oij,oij)) - LDV;
-        I(j,i) = I(i,j);
+        LDVIJ(i,j) = logdet(V(oij,oij));
 	end
 end
+
+I = symmetrise(LDVI+LDVI'-LDVIJ-logdet(V));

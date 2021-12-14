@@ -28,6 +28,6 @@ for a = 1:g
 	for b = a+1:g
         goab = 1:n; goab([groups{a} groups{b}]) = [];
         I(a,b) = LDVG(a) + LDVG(b) - logdet(V(goab,goab)) - LDV;
-        I(b,a) = I(a,b);
 	end
 end
+I = symmetrise(I);

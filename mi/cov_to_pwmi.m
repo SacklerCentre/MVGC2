@@ -15,12 +15,7 @@ function I = cov_to_pwmi(V)
 [n,n1] = size(V);
 assert(n1 == n,'Covariance matrix must be square');
 
-LDV = log(diag(V));
-I = nan(n);
-for i = 1:n
-	for j = i+1:n
-		ij = [i j];
-		I(i,j) = LDV(i) + LDV(j) - logdet(V(ij,ij));
-        I(j,i) = I(i,j);
-	end
-end
+DV = diag(V);
+LDV = log(DV);
+I = LDV+LDV' - log(DV*DV'-V.*V);
+I(1:n+1:n*n) = NaN; % make sure NaNs on diagonal.

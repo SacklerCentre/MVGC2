@@ -13,9 +13,9 @@ function I = cov_to_iomi(V)
 [n,n1] = size(V);
 assert(n1 == n,'Covariance matrix must be square');
 
-LDV = logdet(V);
-I = nan(n,1);
+LDVOI = zeros(n,1);
 for i = 1:n
 	oi = 1:n; oi(i) = [];
-	I(i) = log(V(i,i)) + logdet(V(oi,oi)) - LDV;
+	LDVOI(i) = logdet(V(oi,oi));
 end
+I = log(diag(V)) + LDVOI - logdet(V);
