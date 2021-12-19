@@ -1,28 +1,40 @@
-function [AA,FF,iters] = var_adjust_mvgc(A,V,x,y,F,maxi);
+function [AA,Fxy,iters] = var_adjust_mvgc(A,V,x,y,F,maxi,ftol);
 
-% Find VAR coefficients based on supplied VAR parameters (A,V)
-% such that GC(y -> x) is equal to specified value F, based on
-% a binary chop. Terminate when binary chop cannot proceed any
-% further, or maximum iterations maxi is exceeded. Result should
-% be tested; that is, check that FF lies as close as required to
-% target FT.
+% Find VAR coefficients AA based on supplied VAR parameters
+% (A,V), such that Fxy, the conditional Granger causality from
+% y to x, is within a given tolerance of the specified value F.
+%
+% The algorithm implements a binary chop. If no tolerance is
+% provided, the search continues until the binary chop can
+% proceed no further, or the maximum number of iterations is
+% exceeded. If a tolerance is provided, the search continues
+% until the tolerance is met, the binary chop cannot proceed,
+% or the maximum number of iterations is exceeded. In either
+% case, the returned result Fxy and number of iterations iters
+% should be checked.
 
 assert(F >= 0,'Target GC must be non-negative!');
 
 if nargin < 6 || isempty(maxi), maxi = 1000;  end
+
+if nargin < 7 || isempty(ftol);
+	hftol = 0;
+else
+	hftol = ftol/2;
+end
 
 % Initialise
 
 rho = specnorm(A);
 iters = 0;
 
-% F = 0 is a special case:
+% F == 0 is a special case:
 
-if F < eps
+if F == 0
 	AA = A;
 	AA(x,y,:) = 0;
 	AA = specnorm(AA,rho);
-	FF = 0;
+	Fxy = 0;
 	return
 end
 
@@ -30,35 +42,33 @@ end
 % A(x,y,:); we try to find a multiplicative factor f which delivers the
 % required GC. Firstly we find a ceiling for f.
 
+f   = 0;
 Axy = A(x,y,:);
-f = 0;
-FF = 0;
-while FF < F
-	iters = iters+1;
-	if iters > maxi, return; end % timed out
+Fxy = 0;
+while iters <= maxi
 	f = f+1;
 	AA = A;
 	AA(x,y,:) = f*Axy;
 	AA = specnorm(AA,rho);
-	FF = var_to_mvgc(AA,V,x,y);
+	Fxy = var_to_mvgc(AA,V,x,y);
+	if Fxy > F, break; end % have a ceiling for f
+	iters = iters+1;
 end
+
+% We've boxed the multiplicative factor between f-1 and f; now binary chop
+% as far as possible (i.e., to machine precision w.r.t. the factor f) or
+% until Fxy is within the specified tolerance of F.
+
 fmin = f-1;
 fmax = f;
-
-% We've boxed f between fmin and fmax; now binary chop as far as possible
-% (i.e., to machine precision w.r.t. f) or as far as necessary (i.e., FF is
-% within machine precision of F).
-
-htol = eps/2;
-while true
+while iters <= maxi
 	fpre = f;                         % previous value of f
 	f = (fmin+fmax)/2;                % binary chop
-	if abs(fpre-f) <= eps, break; end % no point going any further!
-	iters = iters+1;
-	if iters > maxi, return; end % timed out
+	if abs(fpre-f) <= eps, break; end % terminate if difference between old and new value of f is negligible
 	AA = A;
 	AA(x,y,:) = f*Axy;
 	AA = specnorm(AA,rho);
-	FF = var_to_mvgc(AA,V,x,y);
-	if FF > F+htol, fmax = f; elseif FF < F-htol, fmin = f; else, break; end % new box
+	Fxy = var_to_mvgc(AA,V,x,y);
+	if Fxy > F+hftol, fmax = f; elseif Fxy < F-hftol, fmin = f; else, break; end % terminate if tolerance met
+	iters = iters+1;
 end
