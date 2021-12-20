@@ -51,7 +51,7 @@ while iters <= maxi
 	if Fxy > F, break; end % have a ceiling for f
 	iters = iters+1;
 end
-f
+
 % We've boxed the multiplicative factor between f-1 and f; now binary chop
 % as far as possible (i.e., to machine precision w.r.t. the factor f) or
 % until Fxy is within the specified tolerance of F.
@@ -70,5 +70,3 @@ while iters <= maxi
 	if Fxy > F+hftol, fmax = f; elseif Fxy < F-hftol, fmin = f; else, break; end % terminate if tolerance met
 	iters = iters+1;
 end
-
-f
