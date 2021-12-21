@@ -1,8 +1,14 @@
 function [R,p,pval] = cov2pcorr(V,N)
 
-% Calculate pairwise partial (Pearson) correlation coefficients from
+% Calculate pairwise partial (Pearson) correlation matrix from
 % covariance matrix using inversion method. P-values are calculated
 % for a 2-tailed test.
+%
+% The algorithm attempts to ensure a positive-definite result; if
+% the covariance matrix is not positive-definite, we fall back on
+% a "safe" method. If the covariance matrix is calculated from time-
+% series data, it is recommended that the data is normalised by
+% variance, as this improves stability.
 %
 % V - sample covariance matrix (unbiased estimator)
 % N - sample size (number of data observations)

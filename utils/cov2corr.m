@@ -1,10 +1,14 @@
-% Convert covariance matrix to correlation matrix
-%
-% Result guaranteed positive-definite if covariance matrix is
-% positive-definite (it should be! - check p == 0), otherwise
-% a result is still returned, but should be treated as suspect.
-
 function [R,p,pval] = cov2corr(V,N)
+
+% Calculate pairwise (Pearson) correlation matrix from covariance
+% matrix. P-values are calculated for a 2-tailed test.
+%
+% The algorithm attempts to ensure a positive-definite result; if
+% the covariance matrix is not positive-definite, we fall back on
+% a "safe" method.
+%
+% V - sample covariance matrix (unbiased estimator)
+% N - sample size (number of data observations)
 
 [n,n1] = size(V);
 assert(ismatrix(V) && n1 == n,'Covariance matrix must be square');
