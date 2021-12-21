@@ -23,7 +23,6 @@ end
 
 if nargout > 2 % calculate (approximate) p-values using Fisher z-transformation
 	assert(nargin > 1 && ~isempty(N),'Need sample size for p-values');
-	z = atanh(rho);                   % Fisher's z
-	fac = sqrt(N-n-5);                % scale factor (there are n-2 controlling variables)
-	pval = 2*(1-normcdf(fac*abs(z))); % 2-tailed test
+	z = sqrt(N-3)*atanh(R);           % z-score for Fisher transformation
+	pval = 2*(1-normcdf(abs(z)));     % 2-tailed test
 end
