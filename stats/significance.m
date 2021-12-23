@@ -90,7 +90,7 @@ else
 	oarg1 = NaN(size(pval));      % first return argument is significances - same shape as p-value array
 	fi    = isfinite(pval);       % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
 	pval  = pval(isfinite(pval)); % vectorise the finite p-values (i.e., not NaN, Inf, etc.)
-	nhyp  = numel(pval)          % number of hypotheses
+	nhyp  = numel(pval);          % number of hypotheses
 end
 
 switch upper(correction)

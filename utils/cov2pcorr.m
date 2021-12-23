@@ -45,6 +45,7 @@ R(1:n+1:n*n) = 1; % put 1s on the diagonal, so that each variable partially- cor
 
 if nargout > 2 % calculate (approximate) p-values using Fisher z-transformation
 	assert(nargin > 1 && ~isempty(N),'Need sample size for p-values');
-	z = sqrt(N-n-1)*atanh(R);         % z-score for Fisher transformation (n-2 controlling variables)
+	RR = R; RR(1:n+1:n*n) = NaN;      % diagonal not relevant!
+	z = sqrt(N-n-1)*atanh(RR);        % z-score for Fisher transformation (n-2 controlling variables)
 	pval = 2*(1-normcdf(abs(z)));     % 2-tailed test
 end
