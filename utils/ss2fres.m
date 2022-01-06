@@ -1,17 +1,17 @@
-function [fres,frpow2,diff] = var2fres(A,V,siparms)
+function [fres,frpow2,diff] = ss2fres(A,C,K,V,siparms)
 
-acfres = nargin < 3 || isempty(siparms);
+acfres = nargin < 5 || isempty(siparms);
 
 if acfres
 
 	% Calculate frequency resolution on the basis of autocorrelation decay to machine precision
 
-	frpow2 = nextpow2(log(eps)/log(specnorm(A))); % so that autocov decays to < eps
+	frpow2 = nextpow2(log(eps)/log(max(specnorm(A),specnorm(A-K*C)))); % so that autocov decays to < eps
 	fres = 2^frpow2;
 	if nargout > 2 % want integral spectral check
 		L = chol(V,'lower');
 		LDV = 2*sum(log(diag(L)));
-		H = var2trfun(A,fres);
+		H = ss2trfun(A,C,K,fres);
 		LDS = zeros(fres+1,1);
 		for k = 1:fres+1 % over [0,pi]
 			HLk = H(:,:,k)*L;
@@ -36,7 +36,7 @@ else
 	failed = true;
 	for frpow2 = minpow2:maxpow2
 		fres = 2^frpow2;
-		H = var2trfun(A,fres);
+		H = ss2trfun(A,C,K,fres);
 		LDS = zeros(fres+1,1);
 		for k = 1:fres+1 % over [0,pi]
 			HLk = H(:,:,k)*L;
