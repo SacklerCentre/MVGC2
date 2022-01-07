@@ -1,10 +1,8 @@
-function [fres,frpow2,diff] = ss2fres(A,C,K,V,siparms)
+function [fres,ierr] = ss2fres(A,C,K,V,siparms)
 
-acfres = nargin < 5 || isempty(siparms);
+if nargin < 5 || isempty(siparms);
 
-if acfres
-
-	% Calculate frequency resolution on the basis of autocorrelation decay to machine precision
+	% Calculate frequency resolution on the basis of autocorrelation decay
 
 	frpow2 = nextpow2(log(eps)/log(max(specnorm(A),specnorm(A-K*C)))); % so that autocov decays to < eps
 	fres = 2^frpow2;
@@ -18,14 +16,14 @@ if acfres
 			LDS(k) = sum(log(diag(chol(HLk*HLk')))); % (log-determinant)/2
 		end
 		ILDS = sum(LDS(1:end-1)+LDS(2:end))/fres; % integrate frequency-domain logdet(S)
-		diff = abs(ILDS-LDV);
+		ierr = abs(ILDS-LDV);
 	end
 
 else
 
 	% Calculate frequency resolution on the basis of spectral integral of logdet|S| = logdet|V|
 
-	assert(isvector(siparms) && length(siparms) == 3,'Spetral integration parameters must be a 3-vector [tolerance, fres pow2 min, fres pow2 max]');
+	assert(isvector(siparms) && length(siparms) == 3,'Spectral integration parameters must be a 3-vector [tolerance, fres pow2 min, fres pow2 max]');
 
 	tol     = siparms(1);
 	minpow2 = siparms(2);
@@ -43,11 +41,12 @@ else
 			LDS(k) = sum(log(diag(chol(HLk*HLk')))); % (log-determinant)/2
 		end
 		ILDS = sum(LDS(1:end-1)+LDS(2:end))/fres; % integrate frequency-domain logdet(S)
-		diff = abs(ILDS-LDV);
-		if diff <= tol
+		ierr = abs(ILDS-LDV);
+		if ierr <= tol
 			failed = false;
 			break;
 		end
 	end
 	if failed, fres = NaN; end
+
 end
