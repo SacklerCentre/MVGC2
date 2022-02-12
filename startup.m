@@ -64,11 +64,6 @@ if include_testing
 end
 clear include_testing
 
-if include_maintainer % MVGC maintainer
-	addpath(fullfile(mvgc2_root,'maintainer'));
-end
-clear include_maintainer
-
 fprintf('[MVGC2 startup] Internal paths set\n');
 
 if ~isempty(gpmat_path) % Initialise in-house "gpmat" Gnuplot/Matlab library if present.
