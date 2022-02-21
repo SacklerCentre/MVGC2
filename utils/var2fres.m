@@ -4,7 +4,12 @@ if nargin < 3 || isempty(siparms);
 
 	% Calculate frequency resolution on the basis of autocorrelation decay
 
+	hardmaxfrp2 = 16;
 	frpow2 = nextpow2(log(eps)/log(specnorm(A))); % so that autocov decays to < eps
+	if frpow2 > 2^hardmaxfrp2
+		fprintf(2,'WARNING: Frequency > 2^%d - defaulting to 2^%d\n',hardmaxfrp2,hardmaxfrp2);
+		frpow2 = 2^hardmaxfrp2;
+	end
 	fres = 2^frpow2;
 	if nargout > 2 % want integral spectral check
 		L = chol(V,'lower');
