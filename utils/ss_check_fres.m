@@ -1,4 +1,4 @@
-function abserr = ss_check_fres(A,C,K,V,fres)
+function ierr = ss_check_fres(A,C,K,V,fres)
 
 % Check that the log-determinant of the CPSD integrates to
 % the log-determinant of the residuals covariance matrix at
@@ -6,20 +6,15 @@ function abserr = ss_check_fres(A,C,K,V,fres)
 
 [L,cholp] = chol(V,'lower');
 if cholp % show stopper
-	abserr = NaN;
+	ierr = NaN;
 	return
 end
 LDV = 2*sum(log(diag(L)));
-
-h     = fres+1;
-[n,r] = size(C);
-In    = eye(n);
-Ir    = eye(r);
-w     = exp(1i*pi*((0:fres)/fres));
-LDS   = zeros(h,1);
-for k = 1:h % over [0,pi]
-	HLk = (In + C*((w(k)*Ir-A)\K))*L;
-	LDS(k) = logdet(HLk*HLk');
+H = ss2trfun(A,C,K,fres);
+LDS = zeros(fres+1,1);
+for k = 1:fres+1 % over [0,pi]
+	HLk = H(:,:,k)*L;
+	LDS(k) = sum(log(diag(chol(HLk*HLk')))); % (log-determinant)/2
 end
-
-abserr = abs(trapz(LDS)/fres - LDV);
+ILDS = sum(LDS(1:end-1)+LDS(2:end))/fres; % integrate frequency-domain logdet(S)
+ierr = abs(ILDS-LDV);
