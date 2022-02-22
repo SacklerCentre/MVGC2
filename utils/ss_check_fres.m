@@ -4,10 +4,14 @@ function ierr = ss_check_fres(A,C,K,V,fres)
 % the log-determinant of the residuals covariance matrix at
 % the given frequency resolution.
 
-[L,cholp] = chol(V,'lower');
-if cholp % show stopper
-	ierr = NaN;
-	return
+if isempty(V)
+	L = eye(size(C,1));
+else
+	[L,cholp] = chol(V,'lower');
+	if cholp % show stopper
+		ierr = NaN;
+		return
+	end
 end
 LDV = 2*sum(log(diag(L)));
 H = ss2trfun(A,C,K,fres);

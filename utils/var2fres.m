@@ -1,5 +1,6 @@
 function [fres,ierr] = var2fres(A,V,fastm,siparms)
 
+if nargin < 2, V = []; end
 if nargin < 3 || isempty(fastm),   fastm   = false;        end
 if nargin < 4 || isempty(siparms), siparms = [1e-12,6,14]; end
 

@@ -1,5 +1,6 @@
 function [fres,ierr] = ss2fres(A,C,K,V,fastm,siparms)
 
+if nargin < 4, V = []; end
 if nargin < 5 || isempty(fastm),   fastm   = false;        end
 if nargin < 6 || isempty(siparms), siparms = [1e-12,6,14]; end
 
