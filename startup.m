@@ -104,6 +104,8 @@ else
 	fprintf(2,'[MVGC2 startup]          routine will be used.\n');
 end
 
+% Deprecated
+%{
 global have_slidare_mex;
 have_slidare_mex = exist('slidare_mex','file') == 3;
 if have_slidare_mex
@@ -114,6 +116,7 @@ else
 	fprintf(2,'[MVGC2 startup]          from the Matlab prompt. Meanwhile, a slower scripted\n');
 	fprintf(2,'[MVGC2 startup]          routine will be used.\n');
 end
+%}
 
 % Check for dependencies on some Matlab(R) toolboxes
 
