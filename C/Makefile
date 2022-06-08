@@ -27,7 +27,7 @@ endif
 MEXEXT =  $(shell mexext)
 MEXDIR = ../mex
 
-# MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slidlyap_mex.c slidare_mex.c
+# MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c slidlyap_mex.c slidare_mex.c DEPRECATED
 MSRC   = findin_mex.c mvfilter_mex.c voulag_mex.c
 MBIN   = $(patsubst %.c,$(MEXDIR)/%.$(MEXEXT),$(MSRC))
 
