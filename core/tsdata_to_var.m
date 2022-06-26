@@ -80,7 +80,7 @@
 function [A,V,E] = tsdata_to_var(X,p,regmode)
 
 [n,m,N] = size(X);
-assert(p < m,'too many lags');
+assert(p < m,'too many lags or bad model order (p = %d, m = %d)',p,m);
 
 M = N*(m-p); % effective number of observations
 
