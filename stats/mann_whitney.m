@@ -12,16 +12,23 @@ function [z,U] = mann_whitney(x1,x2)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% To calculate p-value(s) for a two-tailed significance test (this works also for
-% multiple hypothesis testing, in which case z may be a vector):
+% To calculate p-value(s)
 %
-% pvals = erfc(abs(z)/sqrt(2));
+% p = erfc(abs(z)/sqrt(2)); % two-tailed
+% p = erfc(+z/sqrt(2))/2;   % right-tail
+% p = erfc(-z/sqrt(2))/2;   % left-tail
 %
-% To calculate significances and critical z-score (two-tailed test) at significance
-% level alpha with multiple-hypothesis adjustment mhtc:
+% This works also for multiple hypothesis testing, in which case z may be a vector).
+% To calculate significances and critical z-score at significance level alpha with
+% multiple-hypothesis adjustment mhtc:
 %
 % [sigs,pcrit] = significance(pvals,alpha,mhtc);
-% zcrit = sqrt(2)*erfcinv(pcrit);
+%
+% then
+%
+% zcrit = (+/-)sqrt(2)*erfcinv(pcrit); % two-tailed (+/-)
+% zcrit = +sqrt(2)*erfcinv(2*pcrit);   % right-tail
+% zcrit = -sqrt(2)*erfcinv(2*pcrit);   % left-tail
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
