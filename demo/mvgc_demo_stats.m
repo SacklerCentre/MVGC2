@@ -173,21 +173,21 @@ ptoc;
 
 assert(~isbad(A),'VAR estimation failed');
 
+% report stats (bail out on error)
+
+var_info(A,SIG,true);
+
 % Now calculate autocovariance according to the VAR model, to as many lags
 % as it takes to decay to below the numerical tolerance level, or to acmaxlags
 % lags if specified (i.e. non-empty).
 
 ptic('*** var_to_autocov... ');
-[G,info] = var_to_autocov(A,SIG,acmaxlags);
+[G,q] = var_to_autocov(A,SIG,acmaxlags);
 ptoc;
-
-% Report and check for errors.
-
-var_info(info,true); % report results (and bail out on error)
 
 % Empirical autocovariance
 
-GE = tsdata_to_autocov(X,info.aclags);
+GE = tsdata_to_autocov(X,q);
 
 figure(2); clf;
 plot_autocov(cat(4,G,GE),{'model','data'},1/fs,[],true,acorr);
