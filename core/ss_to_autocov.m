@@ -35,9 +35,9 @@ L = A*M*C' + K*V; % Lambda_1
 G(:,:,2) = C*L;   % Gamma_1
 
 if alags
-	for k = 2:p
-		L = A*L;          % Lambda_k
-		G(:,:,k+1) = C*L; % Gamma_k
+	for k = 3:p+1
+		L = A*L;        % Lambda_k
+		G(:,:,k) = C*L; % Gamma_k
 	end
 else
 	% iterate until ||Gamma_k|| hits tolerance (default: floating-point accuracy relative to G_0)
