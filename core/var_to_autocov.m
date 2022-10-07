@@ -1,4 +1,17 @@
 % Autocovariance sequence for VAR model
+%
+% NOTES:
+%
+% Gamma_k is returned in G(:,:,k+1)
+%
+% Positive qmax is maximum lags; calculate sequence iteratively until
+% within tolerance or maximum lags exceeded.
+%
+% Negative qmax is absolute number of lags.
+%
+% if qmax == 0, the covariance matrix Gamma_0 is returned in G.
+%
+% Default tolerance is machine fp precision relative to Gamma_0.
 
 function [G,q] = var_to_autocov(A,V,qmax,tol)
 
@@ -31,23 +44,25 @@ end
 
 % Initialise reverse covariance sequence
 
-B = zeros(pn,n);
+R = zeros(pn,n);
 for k = 1:p
-	B((k-1)*n+1:k*n,:) = G(:,:,p-k+1);
+	R((k-1)*n+1:k*n,:) = G(:,:,p-k+1);
 end
 
 % Calculate autocovariances iteratively
 
-if alags
-	% calculate recursively from associated VAR(1) solution, from p lags up to q lags
-	for k = p+1:q+1
-		G(:,:,k) = A*B;
-		B = [G(:,:,k);B(1:pn1,:)]; % update reverse covariance sequence
+if alags % calculate recursively from p lags up to q lags
+
+	G = cat(3,G,zeros(n,n,q1-p)); % pre-allocate
+	for k = p+1:q1
+		G(:,:,k) = A*R;
+		R = [G(:,:,k);R(1:pn1,:)]; % update reverse covariance sequence
 	end
-else
+
+else     % calculate recursively from p lags until convergence or maximum lags exceeded
+
 	if nargin < 4 || isempty(tol), tol = eps(maxabs(G(:,:,1))); end
 	k = p;
-	% calculate recursively from associated VAR(1) solution, from p lags until convergence
 	while maxabs(G(:,:,k)) > tol
 		if k > qmax
 			fprintf(2,'WARNING: covariance sequence failed to converge (increase max. lags?)\n');
@@ -55,8 +70,9 @@ else
 			return
 		end
 		k = k+1;
-		G(:,:,k) = A*B;
-		B = [G(:,:,k);B(1:pn1,:)]; % update reverse covariance sequence
-		q = k-1;
+		G(:,:,k) = A*R;
+		R = [G(:,:,k);R(1:pn1,:)]; % update reverse covariance sequence
 	end
+	q = k-1;
+
 end
