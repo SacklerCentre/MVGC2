@@ -1,13 +1,19 @@
-function f = var_to_sgwcgc(A,V,group,fres)
+function f = var_to_sgwcgc(A,V,groups,fres)
 
-% inter-group (conditional) spectral GCs
+% Groupwise-conditional spectral GCs
+%
+% Groups supplied as a cell vector of index vectors.
+%
+% GC is calculated between each pair of groups (first index is target
+% group, second is source group), conditioning on all other variables
+% in the system specified by the VAR paremeters A,V.
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
 [n1,n2] = size(V);
 assert(n1 == n && n2 == n,'Residuals covariance matrix must be square, and match coefficients matrix');
 
-g = check_group(group,n);
+g = check_group(groups,n);
 
 pn = p*n;
 pn1 = pn-n;
@@ -21,14 +27,14 @@ H = var2trfun(A,fres);
 
 PVL = cell(g,1);
 for a = 1:g
-    x = group{a};
-    w = 1:n; w(x) = []; % omit group a
+    x = groups{a};
+    w = 1:n; w(x) = []; % omit groups a
     PVL{a} = chol(parcov(V,w,x),'lower'); % pre-compute the partial covariances for efficiency
 end
 
 for b = 1:g
-	y = group{b};
-    r = 1:n; r(y) = []; % omit group b
+	y = groups{b};
+    r = 1:n; r(y) = []; % omit groups b
 
 	ny   = length(y);
 	nr   = length(r);
@@ -58,9 +64,9 @@ for b = 1:g
 
     for a = 1:g
         if a == b, continue; end
-        x = group{a};
-        xr = findin(x,r);   % indices of group{a} in r
-        w = 1:n; w(x) = []; % omit group a
+        x = groups{a};
+        xr = findin(x,r);   % indices of groups{a} in r
+        w = 1:n; w(x) = []; % omit groups a
 
         SR  = VR(xr,xr);   % reduced model spectrum is flat!
         LDSR = logdet(SR);

@@ -19,7 +19,6 @@ if ~exist('include_experimental', 'var'), include_experimental = true;  end
 if ~exist('include_extras',       'var'), include_extras       = true;  end
 if ~exist('include_deprecated',   'var'), include_deprecated   = false; end
 if ~exist('include_testing',      'var'), include_testing      = false; end
-if ~exist('include_maintainer',   'var'), include_maintainer   = false; end
 
 % Optional external library paths - set to empty to omit from initialisation
 %

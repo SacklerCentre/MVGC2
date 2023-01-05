@@ -37,7 +37,7 @@ end
 addpath(mvgc2_root);
 addpath(fullfile(mvgc2_root,'core'));
 addpath(genpath(fullfile(mvgc2_root,'gc')));
-addpath(genpath(fullfile(mvgc2_root,'cc')));
+addpath(genpath(fullfile(mvgc2_root,'mi')));
 addpath(fullfile(mvgc2_root,'stats'));
 addpath(fullfile(mvgc2_root,'utils'));
 addpath(fullfile(mvgc2_root,'demo'));
@@ -63,11 +63,6 @@ if include_testing
 	addpath(genpath(fullfile(mvgc2_root,'testing')));
 end
 clear include_testing
-
-if include_maintainer % MVGC maintainer
-	addpath(fullfile(mvgc2_root,'maintainer'));
-end
-clear include_maintainer
 
 fprintf('[MVGC2 startup] Internal paths set\n');
 
@@ -109,6 +104,8 @@ else
 	fprintf(2,'[MVGC2 startup]          routine will be used.\n');
 end
 
+% Deprecated
+%{
 global have_slidare_mex;
 have_slidare_mex = exist('slidare_mex','file') == 3;
 if have_slidare_mex
@@ -119,6 +116,7 @@ else
 	fprintf(2,'[MVGC2 startup]          from the Matlab prompt. Meanwhile, a slower scripted\n');
 	fprintf(2,'[MVGC2 startup]          routine will be used.\n');
 end
+%}
 
 % Check for dependencies on some Matlab(R) toolboxes
 

@@ -1,6 +1,6 @@
-function F = var_to_cggc(A,V,x)
+function f = var_to_scggc(A,V,x)
 
-% Conditional GGC
+% Conditional spectral GGC
 %
 % GGC is calculated for the multivariable specified by the vector x,
 % conditioning on all other variables in the system specified by the
@@ -14,19 +14,4 @@ assert(n1 == n && n2 == n,'Residuals covariance matrix must be square, and match
 x = x(:)'; % vectorise multivariable indices
 assert(all(x >=1 & x <= n),'Some x indices out of range');
 
-DV = diag(V);
-z = 1:n; z(x) = [];
-nx = length(x);
-VRx = zeros(nx,1);
-for i = 1:nx
-	y = x; y(i) = [];
-	r = [x(i) z];
-	[~,VR,rep] = vardare(A,V,y,r);
-	if sserror(rep,i) % check DARE report, bail out on error
-		sserr = true;
-		break;
-	end
-	VRx(i) = VR(1,1);
-
-end
-F = sum(log(VRx)) - sum(log(DV(x)));
+TODO

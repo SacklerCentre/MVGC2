@@ -1,13 +1,15 @@
-function F = ss_to_cwiogc(A,C,K,V,inout)
+function F = ss_to_iogc(A,C,K,V,inout)
 
-% in/out group GCs
+% in/out GCs per variable
 
 [n,r] = ss_parms(A,C,K,V);
 
-switch lower(inout)
-	case 'in' , gcin = true;
-	case 'out', gcin = false;
-	otherwise , error('in/out parameter must be ''in'' or ''out''');
+if strcmpi(inout,'in')
+	gcin = true;
+elseif strcmpi(inout,'out')
+	gcin = false;
+else
+	error('in/out parameter must be ''in'' or ''out''');
 end
 
 F = nan(n,1);

@@ -1,11 +1,18 @@
-function f = var_to_sgwggc(A,V,group,fres)
+function f = var_to_sgwcggc(A,V,groups,fres)
+
+% Groupwise-conditional spectral GGCs
+%
+% Groups supplied as a cell vector of index vectors.
+%
+% Global GC is calculated for each groups, conditioning on all other
+% variables in the system specified by the VAR paremeters A,V.
 
 [n,n1,p] = size(A);
 assert(n1 == n,'VAR coefficients matrix has bad shape');
 [n1,n2] = size(V);
 assert(n1 == n && n2 == n,'Residuals covariance matrix must be square, and match coefficients matrix');
 
-g = check_group(group,n);
+g = check_group(groups,n);
 
 pn   = p*n;
 pn1  = pn-n;
@@ -16,7 +23,7 @@ f = nan(g,h);
 H = var2trfun(A,fres);
 
 for a = 1:g
-	x = group{a};
+	x = groups{a};
     z = 1:n; z(x) = []; % omit x
     nx = length(x);
 	ny = nx-1;

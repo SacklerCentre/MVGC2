@@ -161,22 +161,14 @@ plot_gc(pdata,ptitle,[],maxp,plotm,[0.6,2.5]);
 
 %%%%%%%%%%%%%%%% Granger causality analysis - frequency domain %%%%%%%%%%%%%%%%%
 
-% Calculate spectral pairwise-conditional causalities resolution from VAR model
-% parameters. If not specified, we set the frequency resolution to something
-% sensible. Warn if resolution is very large, as this may cause problems.
+% If not specified, we set the frequency resolution to something sensible.
 
 if isempty(fres)
-	fres = var2fres(A,V);
-	maxfres = 2^14; % adjust to taste
-	if fres > maxfres
-		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
-		fres = maxfres;
-	else
-		fprintf('\nUsing frequency resolution %d',fres);
-	end
+	[fres,fabserr] = var2fres(A,V);
+else
+	fabserr = var_check_fres(A,V,fres);
 end
-fabserr = var_check_fres(A,V,fres);
-fprintf(' (absolute integration error = %e)\n',fabserr);
+fprintf('\nUsing frequency resolution %d (absolute integration error = %e)\n',fres,fabserr);
 
 ptic(sprintf('\n*** var_to_spwcgc (at frequency resolution = %d)... ',fres));
 f = var_to_spwcgc(A,V,fres);

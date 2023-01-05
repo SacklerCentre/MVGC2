@@ -80,15 +80,18 @@
 function [A,V,E] = tsdata_to_var(X,p,regmode)
 
 [n,m,N] = size(X);
-assert(p < m,'too many lags');
+assert(p < m,'too many lags or bad model order (p = %d, m = %d)',p,m);
+
+M = N*(m-p); % effective number of observations
 
 if p == 0 % white noise!
 	A = zeros(n,n,0);
-	M = N*m;
-	X0 = reshape(demean(X),n,M);
-	V = (X0*X0')/(M-1);
-	if nargout > 2
-		E = X; % the residuals are just the time series itself!
+	if nargout > 1
+		X0 = reshape(demean(X),n,M);
+		V = (X0*X0')/(M-1);
+		if nargout > 2
+			E = X; % the residuals are just the time series itself!
+		end
 	end
 	return
 end
@@ -97,7 +100,6 @@ X = demean(X); % no constant term
 
 if  strcmpi(regmode,'OLS') % OLS (QR decomposition)
 
-	M = N*(m-p);  % effective number of observations
 	obs = p+1:m;  % the useable observations (i.e., lose the first p)
 
 	X0 = reshape(X(:,obs,:),n,M); % concatenate trials for unlagged observations
@@ -110,11 +112,7 @@ if  strcmpi(regmode,'OLS') % OLS (QR decomposition)
 	A = X0/XL; % OLS (via QR decomposition)
 
 	if nargout > 1
-		E = X0-A*XL;        % residuals
-		V = (E*E')/(M-1);   % residuals covariance matrix (unbiased estimator)
-		if nargout > 2      % align residuals per-trial with data (lose p lags)
-			E = cat(2,nan(n,p,N),reshape(E,n,m-p,N));
-		end
+		E = X0-A*XL; % residuals
 	end
 
 	A = reshape(A,n,n,p); % so A(:,:,k) is the k-lag coefficients matrix
@@ -179,14 +177,17 @@ elseif strcmpi(regmode,'LWR') % LWR (Morf et al.)
 	A = reshape(-A0\AF(:,n+1:p1n),n,n,p); % so A(:,:,k) is the k-lag coefficients matrix
 
 	if nargout > 1
-		M = N*(m-p);      % residuals lose p lags
 		E = A0\EF;        % residuals
-		V = (E*E')/(M-1); % residuals covariance matrix (unbiased estimator)
-		if nargout > 2    % align residuals per-trial with data (lose p lags)
-			E = cat(2,nan(n,p,N),reshape(E,n,m-p,N));
-		end
 	end
 
 else
 	error('unknown regression mode ''%s''',regmode);
+end
+
+if nargout > 1
+	V = (E*E')/(M-1); % residuals covariance matrix (unbiased estimator)
+	if nargout > 2
+%		E = cat(2,zero(n,p,N),reshape(E,n,m-p,N)); % pad first p lags of residuals with zeros to align with X
+		E = reshape(E,n,m-p,N); % temp fix for whiteness, rsquared and consistency routines - better to pad!
+	end
 end

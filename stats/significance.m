@@ -6,8 +6,8 @@
 %
 %% Syntax
 %
-%     [sig,pcrit] = significance(pval,alpha,correction,false)
-%     pcrit       = significance(nhyp,alpha,correction,true)
+%     [sig,pcrit] = significance(pval,alpha,correction,flag)
+%     sig         = significance(nhyp,alpha,correction,'nopv')
 %
 %% Arguments
 %
@@ -15,16 +15,18 @@
 %
 % _input_
 %
-%     pval         p-values
-%     nhyp         number of hypotheses
-%     alpha        significance level
-%     correction   multiple hypotheses correction (see Description)
-%     nopv         no p-values; first argument is number of hypotheses, only return critical p-value  (default: false)
+%     pval             p-values
+%     nhyp             number of hypotheses
+%     alpha            significance level
+%     correction       multiple hypotheses correction (see Description)
+%     flag ==  empty   p-values for all finite entries taken into account
+%     flag == 'symm'   only finite p-values on and above the diagonal taken into account
+%     flag == 'nopv'   no p-values: first argument is number of hypotheses, only return critical p-value
 %
 % _output_
 %
-%     sig          statistical significance (1 = reject H0, 0 = can't reject H0
-%     pcrit        critical p-value
+%     sig              statistical significance (1 = reject H0, 0 = can't reject H0
+%     pcrit            critical p-value
 %
 %% Description
 %
@@ -34,6 +36,14 @@
 % test adjustment, and may be one of: |'None'|, |'Bonferroni'|, |'Sidak'|,
 % |'FDR'| (false discovery rate, independent hypotheses or positively correlated
 % hypotheses [1]) or |'FDRD'| (false discovery rate, arbitrary dependencies [2]).
+%
+% If the 'nopv' flag is supplied, the first argument is the number of hypothesis,
+% and only critical values are returned; this may not work for some multiple
+% hypothesis correction methods.
+%
+% If the 'symm' flag is supplied, a symmetric matrix of p-values is assumed, and
+% only finite p-values on and above the diagonal are taken into account. This is
+% useful, e.g., for naturally symmetric statistics such as correlation matrices.
 %
 % *_Note:_* |correction = 'None'| is not recommended for multiple
 % hypotheses, so is _not_ the default! |'FDRD'| is generally a good choice.
@@ -56,15 +66,27 @@
 %
 %%
 
-function [oarg1,oarg2] = significance(iarg1,alpha,correction,nopv)
+function [oarg1,oarg2] = significance(iarg1,alpha,correction,flag)
 
-if nargin < 4 || isempty(nopv), nopv = false; end
+nopv = false;
+symm = false;
+if nargin > 3 && ~isempty(flag)
+	switch lower(flag)
+		case 'nopv', nopv = true;
+		case 'symm', symm = true;
+		otherwise, error('Unknown flag');
+	end
+end
 
 if nopv % some methods don't require actual p-values, just the number of hypotheses
 	assert(nargout < 2,'"No p-values" option only returns one argument (critical p-value)!');
-	nhyp = iarg1;                % first input argument is the number of hypotheses
+	nhyp = iarg1;  % first input argument is the number of hypotheses
 else
-	pval  = iarg1;                % first input argument is array of p-values
+	pval = iarg1; % first input argument is array of p-values
+	if symm
+		assert(ismatrix(pval),'p-values must be a matrix (assumed symmetric) if called with ''symm'' flag');
+		pval(logical(tril(ones(size(pval,1)),-1))) = NaN; % NaNs below the diagonal
+	end
 	oarg1 = NaN(size(pval));      % first return argument is significances - same shape as p-value array
 	fi    = isfinite(pval);       % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
 	pval  = pval(isfinite(pval)); % vectorise the finite p-values (i.e., not NaN, Inf, etc.)
@@ -72,31 +94,19 @@ else
 end
 
 switch upper(correction)
-
-    case 'NONE';
-
+    case 'NONE'
 		pcrit = alpha;
-
     case 'BONFERRONI' % assumes independence of test statistics
-
 		pcrit = alpha/nhyp;
-
-    case 'SIDAK' % assumes independence of test statistics
-
+    case 'SIDAK'      % assumes independence of test statistics
 		pcrit = 1-realpow(1-alpha,1/nhyp);
-
-    case 'FDR'   % assumes independence (or positive correlation) of test statistics (more powerful)
-
+    case 'FDR'        % assumes independence (or positive correlation) of test statistics (more powerful)
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,true);
-
-    case 'FDRD' %  possible dependencies - no correlation assumptions
-
+    case 'FDRD'       %  possible dependencies - no correlation assumptions
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,false);
-
-    otherwise
-		error('Unknown correction method');
+    otherwise, error('Unknown correction method');
 end
 
 if nopv
@@ -104,6 +114,9 @@ if nopv
 else
 	oarg1(fi) = 0+(pval < pcrit+eps); % first return argument is significance; reject H0 when true (0+ converts to double), finites will be in same positions as they were in original p-value array
 	oarg2 = pcrit;                    % second return argument is critical value
+	if symm
+		oarg1 = symmetrise(oarg1);    % copy significances from upper to lower triangle of matrix
+	end
 end
 
 function pcrit = fdr_bh(pvals,q,pdep)
@@ -135,7 +148,7 @@ else    % BH procedure for any dependency structure
 	thresh = (1:m)*q/(m*sum(1./(1:m)));
 end
 
-maxidx = find(psorted <= thresh,1,'last'); %find greatest significant pvalue
+maxidx = find(psorted <= thresh,1,'last'); % find greatest significant pvalue
 if isempty(maxidx),
     pcrit = 0;
 else
