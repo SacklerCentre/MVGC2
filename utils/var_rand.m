@@ -1,16 +1,16 @@
 function A = var_rand(n,p,rho,w,plotm)
 
 % Generate random VAR covariance matrices
+% Generate a random VAR coefficients sequence with given spectral radius
+% and decay weighting factor.
 %
 % n       - observation variable dimension, or connectivity matrix/array
 % p       - number of lags
 % rho     - spectral radius
-% w       - decay weighting parameter: empty (default) = don't weight
+% w       - decay weighting factor: empty (default) = don't weight
 %
 % A       - VAR coefficients array
 %
-% TODO
-
 % plotm = []      - don't plot
 % plotm = n       - Matlab plot to figure n (if zero, use next)
 % plotm = string  - Gnuplot terminal (may be empty)
