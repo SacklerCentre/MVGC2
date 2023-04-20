@@ -56,23 +56,24 @@ while lamw < lam
 end
 
 % binary chop
-wmin = 0;
-wmax = w;
+wlo = 0;
+whi = w;
 while true
-	w = (wmin+wmax)/2;
+	w = (wlo+whi)/2;
 	Aw = specnorm(w*A,rho);
 	evals = evals+1;
 	lamw = vardec(Aw);
 	if     lamw < lam
-		wmin = w;
+		wlo = w;
 	elseif lamw > lam
-		wmax = w;
+		whi = w;
 	else
 		break % within tolerance tol of lam
 	end
-	if wmax-wmin < tol
+	if whi-wlo < tol
 		break % run out of wiggle-room!
 	end
 end
+% we have a w that is good as it gets
 A = Aw;
-lrerr = abs(lamw-lam)/abs(lam);
+lrerr = abs(lamw-lam)/abs(lam); % relative error for decay factor
