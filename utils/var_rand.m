@@ -1,22 +1,17 @@
-function A = var_rand(n,p,rho,w,plotm)
+function [A,lam] = var_rand(n,p,rho,w,plotm)
 
-% Generate random VAR covariance matrices
 % Generate a random VAR coefficients sequence with given spectral radius
-% and decay weighting factor.
+% and VAR coefficients decay weighting factor.
 %
 % n       - observation variable dimension, or connectivity matrix/array
 % p       - number of lags
 % rho     - spectral radius
-% w       - decay weighting factor: empty (default) = don't weight
+% w       - VAR coefficients decay weighting factor: empty (default) = don't weight
 %
-% A       - VAR coefficients array
-%
-% plotm = []      - don't plot
-% plotm = n       - Matlab plot to figure n (if zero, use next)
-% plotm = string  - Gnuplot terminal (may be empty)
+% A       - VAR coefficients sequence (3D array, last index is lag)
+% lam     - VAR coefficients exponential decay factor
 
 if nargin < 4, w     = []; end
-if nargin < 5, plotm = []; end
 
 if isscalar(n)
 	A = randn(n,n,p);
@@ -39,19 +34,6 @@ else
 	A = specnorm(exp(-w*sqrt(p))*A,rho);
 end
 
-if ~isempty(plotm) % we're going to plot
-	a = zeros(p,1);
-	for k = 1:p
-		a(k) = norm(A(:,:,k));
-	end
-	if ischar(plotm) % plotm is gpterm
-		gp_qplot((1:p)',a,[],'set xlabel "k"\nset ylabel "|A|"\nset xtics 1\nunset key\nset grid',plotm);
-	elseif plotm
-		if plotm == 0, figure; else, figure(plotm); end; clf;
-		plot((1:p)',a);
-		ylim([0 1]);
-		xlabel('$k$','Interpreter','latex');
-		y=ylabel('$\Vert A_k \Vert$','rot',0,'Interpreter','latex');
-		set(y, 'position', get(y,'position')-[0.2,0,0]);
-	end
+if nargout > 1
+	lam = vardec(A);
 end

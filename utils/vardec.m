@@ -1,6 +1,6 @@
-function [A,a] = vardec1(A,lam,plotm)
+function [A,a] = vardec(A,lam,plotm)
 
-% VAR coefficients sequence day
+% VAR coefficients sequence decay
 %
 % [lam,a] = vardec(A) returns the fitted exponential decay factor
 %           for the given VAR coefficients sequence A.
@@ -26,7 +26,7 @@ if noweight % no decay factor supplied; return fitted decay factor
 	parms = [(1:p)' ones(p,1)]\log(a); % fit to exponential (linear regression = OLS)
 	A = -parms(1);                     % this is the fitted decay factor lam
 
-else                          % weight the AR coefficients so decay = lam
+else        % weight the AR coefficients so decay = lam
 
 	aa = exp(-lam*(1:p)');
 	for k = 1:p
