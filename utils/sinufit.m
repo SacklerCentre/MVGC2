@@ -45,15 +45,15 @@ if cmse
 	assert(isvector(f),'For ''mse'' option, a vector of frequencies must be supplied');
 	f = f(:); % ensure column vector
 else
+	assert(nargin > 2,'Too few input arguments');
 	if nargin < 4 || isempty(fftol), fftol = 1e-6;  end % Default tolerance for 'fminbnd' frequency fit
 	if nargin < 5 || isempty(verb),  verb  = false; end % Verbosity (if set, print 'fminbnd' diagnostics)
-
 	if isscalar(f) || iscolumn(f)
 		f = f + 10*[-1,1]*(fs/m);  % a reasonable default width
 	elseif isrow(f)
 		% do nothing
 	else
-		assert(ismatrix(f) && size(f,2) == 2,'Fit frequencies must be a scalar, vector or two-column matrix');
+		assert(ismatrix(f) && size(f,2) == 2,'Fit frequencies must be a scalar, column vector, or two-column matrix');
 		assert(all(f(:,2) > f(:,1)),'Fit frequencies must be ascending');
 	end
 end
