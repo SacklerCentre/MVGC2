@@ -10,7 +10,7 @@
 %
 % x         matrix of time-series values (variables x observations)
 % fs        sampling frequency (default: angular frequency in range 0 ... 2*pi)
-% f         frequency range: scalar (automatic), ascending 2-vector, or vector of values for MSE
+% f         frequency range: scalar or column vector (automatic), or 2-column vector/matrix specifying explicit bounds
 % fftol     frequency fit tolerance (default: 1e-6)
 % verb      verbosity
 %
@@ -48,10 +48,12 @@ else
 	if nargin < 4 || isempty(fftol), fftol = 1e-6;  end % Default tolerance for 'fminbnd' frequency fit
 	if nargin < 5 || isempty(verb),  verb  = false; end % Verbosity (if set, print 'fminbnd' diagnostics)
 
-	if isvector(f)
-		f = f(:) + [-1,1]*(fs/m); % ensure column vector; m/fs = time in seconds; fs/m is a reasonable width
+	if isscalar(f) || iscolumn(f)
+		f = f + 10*[-1,1]*(fs/m);  % a reasonable default width
+	elseif isrow(f)
+		% do nothing
 	else
-		assert(ismatrix(f) && size(f,2) == 2,'Fit frequencies must be a vector or two-column matrix');
+		assert(ismatrix(f) && size(f,2) == 2,'Fit frequencies must be a scalar, vector or two-column matrix');
 		assert(all(f(:,2) > f(:,1)),'Fit frequencies must be ascending');
 	end
 end

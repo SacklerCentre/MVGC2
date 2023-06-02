@@ -1,4 +1,4 @@
-function [A,lam] = var_rand(n,p,rho,w,plotm)
+function [A,lam] = var_rand(n,p,rho,w)
 
 % Generate a random VAR coefficients sequence with given spectral radius
 % and VAR coefficients decay weighting factor.
@@ -11,7 +11,7 @@ function [A,lam] = var_rand(n,p,rho,w,plotm)
 % A       - VAR coefficients sequence (3D array, last index is lag)
 % lam     - VAR coefficients exponential decay factor
 
-if nargin < 4, w     = []; end
+if nargin < 4, w = []; end
 
 if isscalar(n)
 	A = randn(n,n,p);
