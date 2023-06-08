@@ -35,7 +35,13 @@ end
 
 A = specnorm(A,rho); % just enforce spectral norm
 
-if isempty(lam) % just enforce spectral norm
+if p == 1 % no decay - just enforce spectral norm
+	lrerr = [];
+	evals = [];
+	return
+end
+
+if isempty(lam) % "natural" decay - just enforce spectral norm
 	lrerr = [];
 	evals = [];
 	return

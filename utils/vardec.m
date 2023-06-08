@@ -10,6 +10,11 @@ function lam = vardec(A,plotm,pres)
 % lam     - VAR coefficients exponential decay factor (empty for "natural" decay)
 
 p = size(A,3);
+if p == 1 % no decay!
+	lam = NaN;
+	return
+end
+
 a = zeros(p,1);
 for k = 1:p
 	a(k) = norm(A(:,:,k));
