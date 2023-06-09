@@ -85,7 +85,7 @@ else
 	pval = iarg1; % first input argument is array of p-values
 	if symm
 		assert(ismatrix(pval),'p-values must be a matrix (assumed symmetric) if called with ''symm'' flag');
-		pval(logical(tril(ones(size(pval,1)),-1))) = NaN; % NaNs below the diagonal
+		pval(tril(true(size(pval,1)),-1)) = NaN; % NaNs below the diagonal
 	end
 	oarg1 = NaN(size(pval));      % first return argument is significances - same shape as p-value array
 	fi    = isfinite(pval);       % index to finite entries (i.e., not NaN, Inf, etc.) - logical array

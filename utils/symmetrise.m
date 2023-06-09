@@ -12,9 +12,9 @@ if nargin < 3 || isempty(ut2lt),     ut2lt     = true; end
 assert(ismatrix(x) && n1 == n,'Input must be a square matrix');
 
 if ut2lt
-    tidx = logical(tril(ones(n),-1)); % logical indices of lower triangle
+    tidx = tril(true(n),-1); % logical indices of lower triangle
 else
-    tidx = logical(triu(ones(n),+1)); % logical indices of upper triangle
+    tidx = triu(true(n),+1); % logical indices of upper triangle
 end
 
 y = x;
