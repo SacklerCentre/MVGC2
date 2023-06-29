@@ -94,16 +94,16 @@ else
 end
 
 switch upper(correction)
-    case 'NONE'
+    case {[],'','NONE'}       % no correction
 		pcrit = alpha;
-    case 'BONFERRONI' % assumes independence of test statistics
+    case {'BON','BONFERRONI'} % assumes independence of test statistics
 		pcrit = alpha/nhyp;
-    case 'SIDAK'      % assumes independence of test statistics
+    case {'SID','SIDAK'}      % assumes independence of test statistics
 		pcrit = 1-realpow(1-alpha,1/nhyp);
-    case 'FDR'        % assumes independence (or positive correlation) of test statistics (more powerful)
+    case 'FDR'                % assumes independence (or positive correlation) of test statistics (more powerful)
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,true);
-    case 'FDRD'       %  possible dependencies - no correlation assumptions
+    case {'FDD','FDRD'}       % possible dependencies - no correlation assumptions
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,false);
     otherwise, error('Unknown correction method');
