@@ -93,6 +93,7 @@ else
 	nhyp  = numel(pval);          % number of hypotheses
 end
 
+if isempty(correction), correction = ''; end
 switch upper(correction)
     case {[],'','NONE'}       % no correction
 		pcrit = alpha;
