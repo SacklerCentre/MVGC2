@@ -1,4 +1,4 @@
-function erates = var2serate(A,V,fs,fbands,rois,fres)
+function [erates,fres] = var2serate(A,V,fs,fbands,rois,fres)
 
 % Calculate spectral entropy rates for VAR model for specified frequency bands
 %
@@ -10,8 +10,8 @@ function erates = var2serate(A,V,fs,fbands,rois,fres)
 % 2-column matrix of frequency bands, or 'std1' for conventional
 % delta, theta, alpha, gamma frequency bands as used in the neuro-
 % science literature; 'std2' splits gamma into high and low gamma.
-% If fbands is left empty, then "broadband" entropy rates (i.e.,
-% across the entire spectrum) are returned.
+% If fbands is left empty (default), then "broadband" entropy rates
+% (i.e.,across the entire spectrum) are returned.
 %
 % rois is a cell vector, where each cell is a vector of channel
 % numbers for the channels in an ROI. It may also take two special
@@ -24,7 +24,7 @@ function erates = var2serate(A,V,fs,fbands,rois,fres)
 % automatically. If it takes the special value 'accest', then
 % a slower, but sometimes more optimal method is used for auto-
 % matic calculation (the default faster method is generally okay,
-% though)
+% though).
 %
 % Results are returned in the vector erates. In the case that fbands
 % is specified as a vector of band boundaries, 'std1', or 'std2', as
@@ -33,6 +33,10 @@ function erates = var2serate(A,V,fs,fbands,rois,fres)
 % entropy rates should also integrate to the corresponding logdet(V).
 
 % Some parameter defaults
+
+if nargin < 4
+	fbands = []; % broadband
+end
 
 if nargin < 5 || isempty(rois)
 	rois = 'allchans'; % return whole-system entropy rates (i.e., all channels considered as a single ROI)
@@ -51,7 +55,7 @@ end
 broadband = isempty(fbands); % return entropy rate at every frequency (at resolution fres) from 0 - Nyqvist
 
 if broadband
-	fprintf('\nBroadband: 0-%g\n',fs/2);
+	fprintf('\nBroadband: 0-%g Hz\n',fs/2);
 else
 
 	% Sort out frequency bands specification
@@ -79,24 +83,25 @@ else
 		fbands(nbb+1,:) = [fb(nbb) fs/2]; % up to Nyqvist frequency
 	end
 	nfbands = size(fbands,1);
-	fprintf('\nFrequency bands:\n');
+	fprintf('\nFrequency bands (Hz):\n');
 	disp(fbands);
 end
 
 % Sort out ROIs
 
-nchans = size(S,1);
+nchans = size(V,1);
 if ischar(rois) && strcmpi(rois,'allchans')    % all channels as a single ROI
-	roi = {1:nchans)
+	roi = {1:nchans};
 	perchan = false;
 	nrois = 1;
 elseif ischar(rois) && strcmpi(rois,'perchan') % each channel as an ROI
 	perchan = true;
 	nrois = nchans;
 else
-	assert(isvector(nrois) && iscell(nrois),'ROI spec must be ''allchans'', ''perchan'', or a cell vector');
+	assert(isvector(rois) && iscell(rois),'ROI spec must be ''allchans'', ''perchan'', or a cell vector');
 	perchan = false;
-	nrois = length(roi);
+	roi = rois;
+	nrois = length(rois);
 end
 
 % Find good spectral resolution
@@ -115,14 +120,14 @@ h = fres+1;
 
 LDS = zeros(h,nrois);
 if perchan
-	for r = 1:nrois
-		LDS(:,r) = log(squeeze(S(r,r,:))); % log-autopwer!
+	for i = 1:nchans
+		LDS(:,i) = log(squeeze(S(i,i,:))); % log-autopwer!
 	end
 else
 	for r = 1:nrois
 		Sr = S(roi{r},roi{r},:);
-		for i = 1:h
-			LDS(i,r) = logdet(Sr(:,:,i));
+		for k = 1:h
+			LDS(k,r) = logdet(Sr(:,:,k));
 		end
 	end
 end
@@ -139,6 +144,6 @@ else
 			erates(b,r) =  bandlimit(LDS(:,r),[],fs,fbands(b,:));
 		end
 	end
-	fprintf('\nEntropy rates: ');
+	fprintf('\nEntropy rates:\n');
 	disp(erates);
 end
