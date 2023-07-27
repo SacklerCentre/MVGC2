@@ -1,4 +1,4 @@
-function [erates,fres] = var2serate(A,C,K,V,fs,fbands,rois,fres)
+function [erates,fres] = ss2serate(A,C,K,V,fs,fbands,rois,fres)
 
 % Calculate spectral entropy rates for SS model for specified
 % frequency bands and ROIs.
