@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%% Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Test data generation parameters[NOTE: omit if supplying your own time series data]
+% Test data generation parameters [NOTE: omit if supplying your own time series data]
 
 defvar('nchans',    5     ); % number of channels
 defvar('nepochs',   10    ); % number of epochs
@@ -17,16 +17,9 @@ defvar('ernorm',    false ); % "normalise" entropy rate (i.e., subtract process 
 defvar('varmomax',  32    ); % maximum model order for VAR model order selection (required for ISS estimation)
 defvar('fres',      []    ); % frequency resolution  for spectral entropy rate (empty for automatic calculation)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% BEGIN GENERATE TEST DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Generate random ISS test data
-%
-% NOTE: This is where you would read in your own time series data; it should
-% be assigned to the variable X as [channels x observations x epochs]; then set
-%
-%     [nchans,nobs,nepochs] = size(X);
-%
-% and skip the following code down to the next section.
+% Generate random ISS test data: FOR YOUR OWN DATA, OMIT AND SKIP TO SECTION BELOW
 
 % Seed random number generator
 
@@ -51,7 +44,14 @@ ptic('*** ss_to_tsdata... ');
 X = ss_to_tsdata(AA,CC,KK,VV,nobs,nepochs);
 ptoc;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% END GENERATE TEST DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% BEGIN LOAD MY DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% X = load_my_data(...); % or whatever... dimensions: [channels x observations x epochs]
+% [nchans,nobs,nepochs] = size(X);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%% END LOAD MY DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % VAR model order estimation (required for ISS estimation)
 
