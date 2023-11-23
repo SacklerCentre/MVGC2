@@ -89,104 +89,97 @@ ptoc;
 info = ss_info(A,C,K,V);
 assert(~info.error,'ISS error(s) found - bailing out');
 
+% If not specified, estimate a reasonable frequency resolution for spectral entropy rate
+
+if isempty(fres)
+	ptic('*** iss2fres... ');
+	[fres,frpow2,frierr] = iss2fres(A,C,K,V);
+	ptoc;
+	fprintf('\nUsing frequency resolution %d = 2^%d (integration error = %.2e)\n',fres,frpow2,frierr);
+end
+
 % Calculate time-domain entropy rate
 
 ERATE = logdet(V);
 if ernorm % we subtract the process covariance
-	ERATE = ERATE - ss_to_autocov(A,C,K,V,0); % NOTE: this will always be negative - that's fine!
-	fprintf('Entropy rate (time domain, normalised) = %g\n',ERATE);
+	EPROC = logdet(ss_to_autocov(A,C,K,V,0)); % process entropy
+	ERATE = ERATE - EPROC;                    % NOTE: this will always be negative - that's fine!
+	fprintf('\nTime-domain entropy rate (nats/sec, normalised) = %g\n',ERATE);
 else
-	fprintf('Entropy rate (time domain) = %g\n',ERATE);
-end
-
-% If not specified, estimate a reasonable frequency resolution for spectral entropy rate
-
-if isempty(fres)
-	ptic('\n*** iss2fres... ');
-	[fres,frpow2,frierr] = iss2fres(A,C,K,V);
-	ptoc;
-	fprintf('\nUsing frequency resolution %d = 2^%d (integration error = %.2e)\n',fres,frpow2,frierr);
+	fprintf('\nTime-domain entropy rate (nats/sec) = %g\n',ERATE);
 end
 
 % Calculate cross-power spectral density (CPSD)
 
 S = ss_to_cpsd(A,C,K,V,fres);
 
-return
+% Calculate spectral entropy rate, and plot it
 
-% Estimated time-domain pairwise-conditional Granger causalities
-
-ptic('*** ss_to_pwcgc... ');
-F = ss_to_pwcgc(A,C,K,V);
-ptoc;
-assert(~isbad(F,false),'GC estimation failed');
-
-% NOTE: we don't have an analytic (asymptotic) distribution for the statistic, so no significance testing here!
-
-% For comparison, we also calculate the actual pairwise-conditional causalities
-
-ptic('*** ss_to_pwcgc... ');
-FF = ss_to_pwcgc(AA,CC,KK,VV);
-ptoc;
-assert(~isbad(FF,false),'GC calculation failed');
-
-% Plot time-domain causal graph
-
-maxF = 1.1*max(nanmax(F(:),nanmax(FF(:))));
-plot_gc({FF,F},{'PWCGC (actual)','PWCGC (estimated)'},[],[maxF maxF]);
-
-%% Granger causality estimation: frequency domain
-
-% Calculate spectral pairwise-conditional causalities resolution from ISS model
-% parameters. If not specified, we set the frequency resolution to something
-% sensible. Warn if resolution is very large, as this may cause problems.
-
-if isempty(fres)
-	maxfres = 2^14; % adjust to taste
-	fres = max(info.fres,infoo.fres);
-	if fres > maxfres
-		fprintf(2,'\nWARNING: esitmated frequency resolution %d exceeds maximum; setting to %d' ,fres,maxfres);
-		fres = maxfres;
-	else
-		fprintf('\nUsing frequency resolution %d',fres);
-	end
+ptic('\n*** calculating spectral entropy rate... ');
+erate = zeros(fres+1,1);
+for k = 1:fres+1
+	erate(k) = logdet(S(:,:,k));
 end
-fabserr = ss_check_fres(A,C,K,V,fres);
-fprintf(' (absolute integration error = %e)\n',fabserr);
-
-ptic(sprintf('\n*** ss_to_spwcgc (at frequency resolution = %d)... ',fres));
-f = ss_to_spwcgc(A,C,K,V,fres);
 ptoc;
-assert(~isbad(f,false),'spectral GC estimation failed');
 
-% For comparison, we also calculate the actual pairwise-conditional spectral causalities
+if ernorm % we subtract the process covariance
+	erate = erate-EPROC; % NOTE: this will NOT necessarily be negative - that's fine!
+end
 
-ptic(sprintf('*** ss_to_spwcgc (at frequency resolution = %d)... ',fres));
-ff = ss_to_spwcgc(AA,CC,KK,VV,fres);
-ptoc;
-assert(~isbad(ff,false),'spectral GC calculation failed');
+% Sanity check: spectral entropy rate should average (approximately) to time-domain value
 
-% Get frequency vector according to the sampling rate.
+fprintf('\nSpectral integral check: rel. error = %.2e\n',abs(1-bandlimit(erate,[],fs)/ERATE));
 
-freqs = sfreqs(fres,fs);
-
-% Plot spectral causal graphs.
-
-plot_sgc({ff,f},freqs,'Spectral Granger causalities (blue = actual, red = estimated)');
-
-% Granger causality calculation: frequency domain -> time-domain
-
-% Check that spectral causalities average (integrate) to time-domain
-% causalities. Note that this may occasionally fail if a certain condition
-% on the VAR parameters is not satisfied (Geweke 1982).
-
-Fint = bandlimit(f,3); % integrate spectral MVGCs (frequency is dimension 3 of CPSD array)
-
-fprintf('\n*** GC spectral integral check... ');
-rr = abs(F-Fint)./(1+abs(F)+abs(Fint)); % relative residuals
-mrr = max(rr(:));                       % maximum relative residual
-if mrr < 1e-5
-    fprintf('PASS: max relative residual = %.2e\n',mrr);
+figure(3); clf;
+f = sfreqs(fres,fs); % get frequency vector
+plot(f, erate);
+if ernorm
+	title('Spectral entropy rate (normalised)');
 else
-    fprintf(2,'FAIL: max relative residual = %.2e (too big!)\n',mrr);
+	title('Spectral entropy rate');
 end
+xlabel('Frequency (Hz)');
+ylabel('entropy rate (nats/sec)');
+xlim([0,fs/2]); % zero to Nyqvist frequency
+yline(ERATE,'r'); % red line at time-domain value
+grid on
+
+% band-limited entropy rates (standard frequency bands)
+
+fbands = [0,4;      ... % delta
+          4,8;      ... % theta
+          8,15;     ... % alpha
+          15,30;    ... % beta
+          30,50;    ... % low gamma
+          50,fs/2];     % high gamma
+
+ptic('\n*** calculating band-limited entropy rates... ');
+nfbands = size(fbands,1);
+BLERATE = zeros(nfbands,1);
+for i = 1:nfbands
+	BLERATE(i) = bandlimit(erate,[],fs,fbands(i,:));
+end
+ptoc;
+
+if ernorm
+	fprintf('\nBand-limited entropy rates (nats/sec,normalised)\n');
+	fprintf('------------------------------------------------\n');
+else
+	fprintf('\nBand-limited entropy rates (nats/sec)\n');
+	fprintf('-------------------------------------\n');
+end
+fprintf('delta      : % 6.4f\n',BLERATE(1));
+fprintf('theta      : % 6.4f\n',BLERATE(2));
+fprintf('alpha      : % 6.4f\n',BLERATE(3));
+fprintf('beta       : % 6.4f\n',BLERATE(4));
+fprintf('low gamma  : % 6.4f\n',BLERATE(5));
+fprintf('high gamma : % 6.4f\n',BLERATE(6));
+if ernorm
+	fprintf('------------------------------------------------\n');
+else
+	fprintf('-------------------------------------\n');
+end
+
+% Sanity check: band-limited entropy rates should sum (approximately) to time-domain value
+
+fprintf('\nBand-limited sum check: rel. error = %.2e\n\n',abs(1-sum(BLERATE)/ERATE));
