@@ -33,7 +33,7 @@
 %
 % You may use this script as a template to calculate entropy rates for your data; by
 % default, synthetic test data is generated (note that state-space model estimation
-% may potentially fail for the generated data - or indeed for your own data. To
+% may potentially fail for the generated data - or indeed for your own data). To
 % calculate entropy rates for your own multivariate, possibly epoched time-series data
 % see comments in the code below.
 %
@@ -97,7 +97,7 @@ ptoc;
 % VAR model order estimation (required for ISS estimation)
 
 ptic('\n*** tsdata_to_varmo... ');
-varmo = tsdata_to_varmo(X,varmomax,'LWR',[],false,1);
+varmo = tsdata_to_varmo(X,varmomax,'LWR',[],false,1); % returns optimal model order according to the AIC
 ptoc;
 assert(varmo > 0,'selected zero VAR model order (non-stationary data or other badness?)');
 if varmo >= varmomax, fprintf(2,'*** WARNING: selected maximum VAR model order (''varmomax'' set too low?)\n'); end
@@ -114,7 +114,7 @@ ptoc;
 % Check and report ISS model order
 
 assert(ssmo > 0,'selected zero ISS model order (non-stationary data or other badness?)');
-if ssmo >= ssmomax, fprintf(2,'*** WARNING: selected maximum ISS model order (''ssmomax'' set too low?)\n'); end
+if ssmo >= ssmomax, fprintf(2,'*** WARNING: selected maximum ISS model order (''pf'' set too low?)\n'); end
 fprintf('\nISS model order (SVC) = %d\n',ssmo);
 
 % ISS model estimation
@@ -130,27 +130,27 @@ ptoc;
 info = ss_info(A,C,K,V);
 assert(~info.error,'ISS error(s) found - bailing out');
 
+% Calculate time-domain entropy rate
+
+erate_td = logdet(V)/2;
+if nne % normalised negentropy rate: subtract entropy rate from process entropy
+	eproc    = logdet(ss_to_autocov(A,C,K,V,0))/2; % process entropy
+	erate_td = eproc - erate_td;                   % NOTE: this will be non-negative
+	fprintf('Time-domain normalised negentropy rate = %g\n',erate_td);
+else
+	fprintf('Time-domain entropy rate = %g\n',erate_td);
+end
+
 % If not specified, estimate a reasonable frequency resolution for spectral entropy rate
 
 if isempty(fres)
-	ptic('*** iss2fres... ');
+	ptic('\n*** iss2fres... ');
 	[fres,frpow2,frierr] = iss2fres(A,C,K,V);
 	ptoc;
 	fprintf('\nUsing frequency resolution %d = 2^%d (integration error = %.2e)\n',fres,frpow2,frierr);
 end
 
-% Calculate time-domain entropy rate
-
-erate_td = logdet(V)/2;
-if nne % normalised negentropy rate: subtract from process entropy
-	eproc    = logdet(ss_to_autocov(A,C,K,V,0))/2; % process entropy
-	erate_td = eproc - erate_td;                   % NOTE: this will be non-negative
-	fprintf('\nTime-domain normalised negentropy rate = %g\n',erate_td);
-else
-	fprintf('\nTime-domain entropy rate = %g\n',erate_td);
-end
-
-% Calculate cross-power spectral density (CPSD)
+% Calculate cross-power spectral density (CPSD) to Nyqvist frequency at specified resolution
 
 S = ss_to_cpsd(A,C,K,V,fres);
 
@@ -163,7 +163,7 @@ for k = 1:fres+1
 end
 ptoc;
 
-if nne % normalised negentropy rate: subtract from process entropy
+if nne % normalised negentropy rate: subtract entropy rate from process entropy
 	erate_fd = eproc-erate_fd; % NOTE: this will not necessarily be non-negative!
 end
 
@@ -189,7 +189,7 @@ xlim([0,fs/2]); % zero to Nyqvist frequency
 yline(erate_td,'r'); % red line at time-domain value
 grid on
 
-% band-limited entropy rates (standard frequency bands)
+% Band-limited entropy rates (standard frequency bands)
 
 fbands = [0,4;      ... % delta
           4,8;      ... % theta
