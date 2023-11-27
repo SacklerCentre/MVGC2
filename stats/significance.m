@@ -85,7 +85,7 @@ else
 	pval = iarg1; % first input argument is array of p-values
 	if symm
 		assert(ismatrix(pval),'p-values must be a matrix (assumed symmetric) if called with ''symm'' flag');
-		pval(logical(tril(ones(size(pval,1)),-1))) = NaN; % NaNs below the diagonal
+		pval(tril(true(size(pval,1)),-1)) = NaN; % NaNs below the diagonal
 	end
 	oarg1 = NaN(size(pval));      % first return argument is significances - same shape as p-value array
 	fi    = isfinite(pval);       % index to finite entries (i.e., not NaN, Inf, etc.) - logical array
@@ -93,17 +93,18 @@ else
 	nhyp  = numel(pval);          % number of hypotheses
 end
 
+if isempty(correction), correction = ''; end
 switch upper(correction)
-    case 'NONE'
+    case {[],'','NONE'}       % no correction
 		pcrit = alpha;
-    case 'BONFERRONI' % assumes independence of test statistics
+    case {'BON','BONFERRONI'} % assumes independence of test statistics
 		pcrit = alpha/nhyp;
-    case 'SIDAK'      % assumes independence of test statistics
+    case {'SID','SIDAK'}      % assumes independence of test statistics
 		pcrit = 1-realpow(1-alpha,1/nhyp);
-    case 'FDR'        % assumes independence (or positive correlation) of test statistics (more powerful)
+    case 'FDR'                % assumes independence (or positive correlation) of test statistics (more powerful)
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,true);
-    case 'FDRD'       %  possible dependencies - no correlation assumptions
+    case {'FDD','FDRD'}       % possible dependencies - no correlation assumptions
 		assert(~nopv,'Need actual p-values for this method');
 		pcrit = fdr_bh(pval,alpha,false);
     otherwise, error('Unknown correction method');

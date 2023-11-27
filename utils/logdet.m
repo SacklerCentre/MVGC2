@@ -21,7 +21,7 @@
 %
 %% Description
 %
-% Returns the log-determinant of the Hermitia positive-definite matrix V in L.
+% Returns the log-determinant of the Hermitian positive-definite matrix V in L.
 % Essentially the same as |log(det(V))|, but avoids potential under/overflow. The 'flag'
 % variable is zero if V is Hermitian positive-definite. If V is not Hermitian positive-
 % definite, the real part of the log-determinant is returned if the imaginary part is not
@@ -35,7 +35,7 @@
 function [LD,flag] = logdet(V)
 
 [L,flag] = chol(V);
-if flag == 0 % symmetric, positive-definite
+if flag == 0 % Hermitian, positive-definite
 	LD = 2*sum(log(diag(L)));
 else
 	DV = det(V);

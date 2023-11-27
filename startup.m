@@ -166,7 +166,7 @@ fprintf('[MVGC2 startup] All warnings enabled\n');
 % Important notes to users
 
 fprintf('[MVGC2 startup]\n');
-fprintf('[MVGC2 startup] NOTE 1: PLEASE DO NOT ADD THE FULL MVGC HIERARCHY TO YOUR MATLAB SEARCH PATH!\n');
+fprintf('[MVGC2 startup] NOTE 1: PLEASE DO NOT ADD THE FULL MVGC2 HIERARCHY TO YOUR MATLAB SEARCH PATH!\n');
 fprintf('[MVGC2 startup]         Doing so is likely to cause problems. This script has already set up\n');
 fprintf('[MVGC2 startup]         MVGC2 paths correctly for your Matlab environment.\n');
 fprintf('[MVGC2 startup]\n');

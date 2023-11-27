@@ -36,4 +36,4 @@ assert(isequal(size(X),size(Y)),'Arrays must have the same dimensions');
 
 if nargin < 3 || isempty(p), p = 1; end % 1-norm
 
-e = norm(X(:)-Y(:),p)/(1+norm(X(:),p)+norm(Y(:),p));
+e = norm(X(:)-Y(:),p) / (1+(norm(X(:),p)+norm(Y(:),p))/2);
