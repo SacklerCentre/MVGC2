@@ -29,7 +29,10 @@
 %
 % Note that entropy rate for a multivariate time series is not calculated per-variable;
 % it is an "overall" entropy rate. If you want per-variable (channel) entropy rates,
-% you must run this routine seperately for each individual channel.
+% you must run this routine seperately for each individual channel, or alternatively
+% use the "EntRate -- Entropy rate estimators for neuroscience" toolbox:
+%
+%   https://github.com/pmediano/EntRate
 %
 % You may use this script as a template to calculate entropy rates for your data; by
 % default, synthetic test data is generated (note that state-space model estimation
@@ -52,7 +55,7 @@ defvar('seed',      0     ); % random seed (0 for unseeded)
 % Other parameters
 
 defvar('fs',        200   ); % sample rate (Hz)
-defvar('nne',       false ); % calculate "normalised negentropy rate" rather than entropy rate.
+defvar('nner',      false ); % calculate "normalised negentropy rate" rather than entropy rate.
 defvar('varmomax',  32    ); % maximum model order for VAR model order selection (required for ISS estimation)
 defvar('fres',      []    ); % frequency resolution  for spectral entropy rate (empty for automatic calculation)
 
@@ -133,7 +136,7 @@ assert(~info.error,'ISS error(s) found - bailing out');
 % Calculate time-domain entropy rate
 
 erate_td = logdet(V)/2;
-if nne % normalised negentropy rate: subtract entropy rate from process entropy
+if nner % normalised negentropy rate: subtract entropy rate from process entropy
 	eproc    = logdet(ss_to_autocov(A,C,K,V,0))/2; % process entropy
 	erate_td = eproc - erate_td;                   % NOTE: this will be non-negative
 	fprintf('Time-domain normalised negentropy rate = %g\n',erate_td);
@@ -163,22 +166,22 @@ for k = 1:fres+1
 end
 ptoc;
 
-if nne % normalised negentropy rate: subtract entropy rate from process entropy
+if nner % normalised negentropy rate: subtract entropy rate from process entropy
 	erate_fd = eproc-erate_fd; % NOTE: this will not necessarily be non-negative!
 end
 
 % Sanity check: spectral entropy rate should average (approximately) to time-domain value
 
-abserrs = abs(erate_td-bandlimit(erate_fd,[],fs));
-fprintf('\nSpectral integral check: abs. error = %.2e\n',abserrs);
-if abserrs > sqrt(eps)
+relerrs = relerr(erate_td,bandlimit(erate_fd,[],fs));
+fprintf('\nSpectral integral check: abs. error = %.2e\n',relerrs);
+if relerrs > sqrt(eps)
 	fprintf(2,'*** WARNING: error is a bit large\n');
 end
 
 figure(3); clf;
 f = sfreqs(fres,fs); % get frequency vector
 plot(f,erate_fd);
-if nne
+if nner
 	title('Spectral normalised negentropy rate');
 else
 	title('Spectral entropy rate');
@@ -206,7 +209,7 @@ for i = 1:nfbands
 end
 ptoc;
 
-if nne
+if nner
 	fprintf('\nBand-limited normalised negentropy rates (nats)\n');
 	fprintf('------------------------------------------------\n');
 else
@@ -219,7 +222,7 @@ fprintf('alpha      : % 6.4f\n',erate_bl(3));
 fprintf('beta       : % 6.4f\n',erate_bl(4));
 fprintf('low gamma  : % 6.4f\n',erate_bl(5));
 fprintf('high gamma : % 6.4f\n',erate_bl(6));
-if nne
+if nner
 	fprintf('------------------------------------------------\n');
 else
 	fprintf('-------------------------------------\n');
@@ -227,8 +230,8 @@ end
 
 % Sanity check: band-limited entropy rates should sum (approximately) to time-domain value
 
-abserrb = abs(erate_td-sum(erate_bl));
-fprintf('\nBand-limited sum check: abs. error = %.2e\n\n',abserrb);
-if abserrb > sqrt(eps)
+relerrb = relerr(erate_td,sum(erate_bl));
+fprintf('\nBand-limited sum check: abs. error = %.2e\n\n',relerrb);
+if relerrb > sqrt(eps)
 	fprintf(2,'*** WARNING: error is a bit large\n');
 end
